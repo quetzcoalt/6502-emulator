@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <bitset>
 
 using namespace std;
 
-using Byte = unsigned char;
-using Word = unsigned short;
-using u32 = unsigned int;
+using Byte = unsigned char;     // 1 byte
+using Word = unsigned short;    // 2 bytes
+using u32 = unsigned int;       // 4 bytes
 
 #define NORMAL  "\x1B[0m"
 #define RED  "\x1B[31m"
@@ -78,6 +79,14 @@ struct Memory
     /* write 1 byte */
     Byte& operator[](u32 address) {
         return Data[address];
+    }
+
+    /* write 2 bytes */
+    Word writeWord(Word Value, u32 Address, u32 cycles) {
+        Data[Address] = Value & 0xFF;
+        Data[Address + 1] = (Value >> 8);
+
+        cycles -= 2;
     }
 };
 
@@ -160,21 +169,53 @@ struct CPU
                 } break;
                 case INS_LDA_ABSX:
                 {
+                    Byte Address = FetchWord(cycles, memory);
+                    Address += X;
+                    cycles--;
+
+                    Byte AddressValue = ReadByte(cycles, Address, memory);
+
+                    A = AddressValue;
 
                     LDASetStatus();
                 } break;
                 case INS_LDA_ABSY:
                 {
+                    Word Address = FetchWord(cycles, memory);
+                    Address += Y;
+                    cycles--;
+
+                    Byte AddressValue = ReadByte(cycles, Address, memory);
+
+                    A = AddressValue;
 
                     LDASetStatus();
                 } break;
                 case INS_LDA_INDX:
                 {
+                    // LDA ($40,X)
+                    Word Address = FetchWord(cycles, memory);
+
+                    Address += X;
+                    cycles--;
+
+                    Word AddressValue = ReadWord(cycles, Address, memory);
+
+                    A = memory[AddressValue];
 
                     LDASetStatus();
                 } break;
                 case INS_LDA_INDY:
                 {
+                    // LDA ($40),Y
+                    Word Address = FetchWord(cycles, memory);
+                    Word AddressValue = ReadWord(cycles, Address, memory);
+
+                    AddressValue += Y;
+                    cycles--;
+
+                    Word FinalValue = ReadWord(cycles, AddressValue, memory);
+                    A = FinalValue;
 
                     LDASetStatus();
                 } break;
@@ -182,13 +223,20 @@ struct CPU
                 /* JUMPS */
                 case INS_JSR:
                 {
-                    Word SBRAdress = FetchWord(cycles, memory);
-                    memory[SP] = 
+                    Word SubAddress = FetchWord(cycles, memory);
+                    memory[S] = PC - 1;
+                    S--;
+                    cycles--;
+
+                    PC = SubAddress;
+                    cycles--;
                 } break;
                 default:
                 {
                     /* TODO: Exception object */
                     printf("Instruction not handled %d", instruction);
+
+                    cycles--;
                 } break;
             }
         }
@@ -226,6 +274,20 @@ struct CPU
         return Data;
     }
 
+    Word ReadWord(u32& cycles, u32 address, Memory &memory) {
+        /* 6502 is little endian */
+        Word Data = memory[address];            /* Lower byte */
+        printf("Address being read is: %04X, with value: %04X\n", address, Data);
+
+
+        Data |= (memory[address + 1] << 8);     /* Higher byte */
+        printf("Address being read is: %04X, with value: %04X\n", address + 1, Data);
+
+        cycles -= 2;
+
+        return Data;
+    }
+
     // opcodes
     static constexpr Byte
         /* LDA */
@@ -240,7 +302,7 @@ struct CPU
         INS_LDA_INDY = 0xB1,
 
         /* JUMPS */
-        INS_JSR = 
+        INS_JSR = 0x20;
 
     void LDASetStatus()
     {
@@ -259,12 +321,18 @@ int main()
     Memory memory;
     CPU cpu;
     cpu.Reset(memory);
+    cpu.Y = 0x05;
 
-    memory[0xFFFC] = CPU::INS_LDA_ZP;
-    memory[0xFFFD] = 0x42;
-    memory[0x0042] = 0x84;
+    memory[0xFFFC] = CPU::INS_LDA_INDX;
+    memory[0xFFFD] = 0x30;
+    memory[0xFFFE] = 0x00;
+    memory[0x0030] = 0x60;
+    memory[0x0031] = 0x70;
+    memory[0x7060] = 0xF3;
 
-    cpu.Execute(3, memory);
+    printf("In address 0x6880: %04X\n", memory[0x6880]);
+
+    cpu.Execute(6, memory);
 
     memory.Debug(0xFFF0, 0xFFFF);
     cpu.Debug();
