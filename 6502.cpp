@@ -124,13 +124,13 @@ struct CPU
             
             switch (instruction)
             {
-                /* ----- LDA ----- */
+                /* -------------------- LDA -------------------- */
                 case INS_LDA_IM:    /* 2 cycles */
                 {
                     Byte value = FetchByte(cycles, memory);
                     A = value;
 
-                    LDASetStatus();
+                    LDSetStatus();
                 } break;
                 case INS_LDA_ZP:    /* 3 cycles */
                 {
@@ -138,7 +138,7 @@ struct CPU
                     Byte zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
                     A = zeroPageValue;
 
-                    LDASetStatus();
+                    LDSetStatus();
                 } break;
                 case INS_LDA_ZPX:   /* 4 cycles */
                 {
@@ -156,7 +156,7 @@ struct CPU
 
                     A = zeroPageValue;
                     
-                    LDASetStatus();
+                    LDSetStatus();
                 } break;
                 case INS_LDA_ABS:   /* 4 cycles */
                 {
@@ -164,7 +164,7 @@ struct CPU
                     Byte AddressValue = ReadByte(cycles, Address, memory);
 
                     A = AddressValue;
-                    LDASetStatus();
+                    LDSetStatus();
                 } break;
                 case INS_LDA_ABSX:  /* 4 cycles (+1 if page crossed) */
                 {
@@ -176,7 +176,7 @@ struct CPU
 
                     A = AddressValue;
 
-                    LDASetStatus();
+                    LDSetStatus();
                 } break;
                 case INS_LDA_ABSY:  /* 4 cycles (+1 if page crossed) */
                 {
@@ -188,7 +188,7 @@ struct CPU
 
                     A = AddressValue;
 
-                    LDASetStatus();
+                    LDSetStatus();
                 } break;
                 case INS_LDA_INDX:  /* 6 cycles */
                 {
@@ -201,7 +201,7 @@ struct CPU
                     Word AddressValue = ReadWord(cycles, Address, memory);
                     A = memory[AddressValue];
 
-                    LDASetStatus();
+                    LDSetStatus();
                 } break;
                 case INS_LDA_INDY:  /* 5 cycles (+1 if page crossed) */
                 {
@@ -215,10 +215,130 @@ struct CPU
                     Word FinalValue = ReadWord(cycles, AddressValue, memory);
                     A = FinalValue;
 
-                    LDASetStatus();
+                    LDSetStatus();
                 } break;
 
-                /* ----- STA ----- */
+
+
+
+                /* -------------------- LDX -------------------- */
+                case INS_LDX_IM:    /* 2 cycles */
+                {
+                    Byte value = FetchByte(cycles, memory);
+                    X = value;
+
+                    LDSetStatus();
+                } break;
+                case INS_LDX_ZP:    /* 3 cycles */
+                {
+                    Byte zeroPageAddress = FetchByte(cycles, memory);
+                    Byte zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+                    X = zeroPageValue;
+
+                    LDSetStatus();
+                } break;
+                case INS_LDX_ZPY:   /* 4 cycles */
+                {
+                    Byte zeroPageAddress = FetchByte(cycles, memory);
+                    
+                    zeroPageAddress += Y;
+
+                    if (zeroPageAddress > ZERO_PAGE_END) {
+                        return;
+                    }
+
+                    cycles--;
+
+                    Byte zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+
+                    X = zeroPageValue;
+                    
+                    LDSetStatus();
+                } break;
+                case INS_LDX_ABS:   /* 4 cycles */
+                {
+                    Byte Address = FetchWord(cycles, memory);
+                    Byte AddressValue = ReadByte(cycles, Address, memory);
+
+                    X = AddressValue;
+                    LDSetStatus();
+                } break;
+                case INS_LDX_ABSY:  /* 4 cycles (+1 if page crossed) */
+                {
+                    Word Address = FetchWord(cycles, memory);
+                    Address += Y;
+                    cycles--;
+
+                    Byte AddressValue = ReadByte(cycles, Address, memory);
+
+                    X = AddressValue;
+
+                    LDSetStatus();
+                } break;
+
+
+
+
+                /* -------------------- LDY -------------------- */
+                case INS_LDY_IM:    /* 2 cycles */
+                {
+                    Byte value = FetchByte(cycles, memory);
+                    Y = value;
+
+                    LDSetStatus();
+                } break;
+                case INS_LDY_ZP:    /* 3 cycles */
+                {
+                    Byte zeroPageAddress = FetchByte(cycles, memory);
+                    Byte zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+                    Y = zeroPageValue;
+
+                    LDSetStatus();
+                } break;
+                case INS_LDY_ZPX:   /* 4 cycles */
+                {
+                    Byte zeroPageAddress = FetchByte(cycles, memory);
+                    
+                    zeroPageAddress += X;
+
+                    if (zeroPageAddress > ZERO_PAGE_END) {
+                        return;
+                    }
+
+                    cycles--;
+
+                    Byte zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+
+                    Y = zeroPageValue;
+                    
+                    LDSetStatus();
+                } break;
+                case INS_LDY_ABS:   /* 4 cycles */
+                {
+                    Byte Address = FetchWord(cycles, memory);
+                    Byte AddressValue = ReadByte(cycles, Address, memory);
+
+                    Y = AddressValue;
+                    LDSetStatus();
+                } break;
+                case INS_LDY_ABSX:  /* 4 cycles (+1 if page crossed) */
+                {
+                    Word Address = FetchWord(cycles, memory);
+                    Address += X;
+                    cycles--;
+
+                    Byte AddressValue = ReadByte(cycles, Address, memory);
+
+                    Y = AddressValue;
+
+                    LDSetStatus();
+                } break;
+
+
+
+
+
+                /* -------------------- STA -------------------- */
                 case INS_STA_ZP:    /* 3 cycles */
                 {
                     Byte zeroPageAddress = FetchByte(cycles, memory);
@@ -356,6 +476,20 @@ struct CPU
         INS_LDA_INDX = 0xA1,
         INS_LDA_INDY = 0xB1,
 
+        /* LDX → Loads a byte of memory into the X register, setting the zero and negative flags as appropriate. */
+        INS_LDX_IM = 0xA2,
+        INS_LDX_ZP = 0xA6,
+        INS_LDX_ZPY = 0xB6,
+        INS_LDX_ABS = 0xAE,
+        INS_LDX_ABSY = 0xBE,
+
+        /* LDY → Loads a byte of memory into the Y register, setting the zero and negative flags as appropriate. */
+        INS_LDY_IM = 0xA0,
+        INS_LDY_ZP = 0xA4,
+        INS_LDY_ZPX = 0xB4,
+        INS_LDY_ABS = 0xAC,
+        INS_LDY_ABSX = 0xBC,
+
         /* STA → Stores the contents of the accumulator into memory. */
         INS_STA_ZP = 0x85,
         INS_STA_ZPX = 0x95,
@@ -365,7 +499,7 @@ struct CPU
         INS_STA_INDX = 0x81,
         INS_STA_INDY = 0x91;
 
-    void LDASetStatus()
+    void LDSetStatus()
     {
         Z = (A == 0);
         N = (A & 0b10000000) > 0;
@@ -384,7 +518,7 @@ int main()
     memory.Initialize();
 
     /* Instructions */
-    memory[0x8000] = CPU::INS_LDA_ZP;
+    memory[0x8000] = CPU::INS_LDA_IM;
     memory[0x8001] = 0x30;
     memory[0x8002] = CPU::INS_STA_ABSX;
     memory[0x8003] = 0x57;
@@ -403,7 +537,7 @@ int main()
     cpu.X = 0x05;
 
     /* Execution */
-    cpu.Execute(8, memory);
+    cpu.Execute(2, memory);
 
     /* Debugging */
     memory.Debug(0xFFF0, 0xFFFF);
