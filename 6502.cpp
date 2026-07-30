@@ -464,6 +464,31 @@ struct CPU
                     cycles--;
                 } break;
 
+
+
+
+                /* ---------- TRANSFER BETWEEN REGISTERS ---------- */
+                case INS_TAX:
+                {
+                    X = A;
+                    LDSetStatus();
+                } break;
+                case INS_TAY:
+                {
+                    Y = A;
+                    LDSetStatus();
+                } break;
+                case INS_TXA:
+                {
+                    A = X;
+                    LDSetStatus();
+                } break;
+                case INS_TYA:
+                {
+                    A = Y;
+                    LDSetStatus();
+                } break;
+
                 default:
                 {
                     /* TODO: Exception object */
@@ -563,7 +588,19 @@ struct CPU
         /* STY → Stores the contents of the Y register into memory. */
         INS_STY_ZP = 0x84,
         INS_STY_ZPX = 0x94,
-        INS_STY_ABS = 0x8C;
+        INS_STY_ABS = 0x8C.
+
+        /* TAX → Content from A to X register, implied mode only */
+        INS_TAX = 0xAA,
+
+        /* TAY → Content from A to Y register, implied mode only */
+        INS_TAY = 0xA8,
+
+        /* TXA → Content from X to A register, implied mode only */
+        INS_TXA = 0x8A,
+
+        /* TYA → Content from Y to A register, implied mode only */
+        INS_TAY = 0x98;
 
     void LDSetStatus()
     {
