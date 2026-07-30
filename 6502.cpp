@@ -496,7 +496,7 @@ struct CPU
 
 
 
-                /* ---------- INCREMENTING AND DECREMENTING ---------- */
+                /* ---------- INCREMENTING AND DECREMENTING REGISTERS ---------- */
                 case INS_DEX:       /* 2 cycles */
                 {
                     X--;
@@ -520,6 +520,124 @@ struct CPU
                     Y++;
                     cycles--;
                     LDSetStatus();
+                } break;
+
+
+
+
+                /* ---------- INCREMENTING AND DECREMENTING A MEMORY VALUE ---------- */
+                case INS_DEC_ZP:        /* 5 cycles */
+                {
+                    Byte Address = FetchByte(cycles, memory);
+                    
+                    Byte Value = memory[Address];
+                    cycles--;
+                    
+                    Value--;
+                    cycles--;
+                    
+                    memory[Address] = Value;
+                    cycles--;
+                } break;
+                case INS_DEC_ZPX:       /* 6 cycles */
+                {
+                    Byte Address = FetchByte(cycles, memory);
+                    Address += X;
+                    cycles--;
+                    
+                    Byte Value = memory[Address];
+                    cycles--;
+                    
+                    Value--;
+                    cycles--;
+                    
+                    memory[Address] = Value;
+                    cycles--;
+                } break;
+                case INS_DEC_ABS:       /* 6 cycles */
+                {
+                    Word Address = FetchWord(cycles, memory);
+                    
+                    Byte Value = memory[Address];
+                    cycles--;
+                    
+                    Value--;
+                    cycles--;
+                    
+                    memory[Address] = Value;
+                    cycles--;
+                } break;
+                case INS_DEC_ABSX:      /* 7 cycles */
+                {
+                    Word Address = FetchWord(cycles, memory);
+                    Address += X;
+                    cycles--;
+                    
+                    Byte Value = memory[Address];
+                    cycles--;
+                    
+                    Value--;
+                    cycles--;
+                    
+                    memory[Address] = Value;
+                    cycles--;
+                } break;
+
+                case INS_INC_ZP:        /* 5 cycles */
+                {
+                    Byte Address = FetchByte(cycles, memory);
+                    
+                    Byte Value = memory[Address];
+                    cycles--;
+                    
+                    Value++;
+                    cycles--;
+                    
+                    memory[Address] = Value;
+                    cycles--;
+                } break;
+                case INS_INC_ZPX:       /* 6 cycles */
+                {
+                    Byte Address = FetchByte(cycles, memory);
+                    Address += X;
+                    cycles--;
+                    
+                    Byte Value = memory[Address];
+                    cycles--;
+                    
+                    Value++;
+                    cycles--;
+                    
+                    memory[Address] = Value;
+                    cycles--;
+                } break;
+                case INS_INC_ABS:       /* 6 cycles */
+                {
+                    Word Address = FetchWord(cycles, memory);
+                    
+                    Byte Value = memory[Address];
+                    cycles--;
+                    
+                    Value++;
+                    cycles--;
+                    
+                    memory[Address] = Value;
+                    cycles--;
+                } break;
+                case INS_INC_ABSX:      /* 7 cycles */
+                {
+                    Word Address = FetchWord(cycles, memory);
+                    Address += X;
+                    cycles--;
+                    
+                    Byte Value = memory[Address];
+                    cycles--;
+                    
+                    Value++;
+                    cycles--;
+                    
+                    memory[Address] = Value;
+                    cycles--;
                 } break;
                 default:
                 {
@@ -606,7 +724,7 @@ struct CPU
         INS_LDY_ABSX = 0xBC,
 
         /* ===== STORE TO MEMORY ===== */
-        +
+        
         /* STA → Stores the contents of the accumulator into memory. */
         INS_STA_ZP = 0x85,
         INS_STA_ZPX = 0x95,
@@ -624,7 +742,7 @@ struct CPU
         /* STY → Stores the contents of the Y register into memory. */
         INS_STY_ZP = 0x84,
         INS_STY_ZPX = 0x94,
-        INS_STY_ABS = 0x8C.
+        INS_STY_ABS = 0x8C,
 
         /* ===== MOVE DATA BETWEEN REGISTERS ===== */
         /* TAX → Content from A to X register */
@@ -637,7 +755,7 @@ struct CPU
         INS_TXA = 0x8A,
 
         /* TYA → Content from Y to A register */
-        INS_TAY = 0x98,
+        INS_TYA = 0x98,
 
         /* ===== INCREMENTING AND DECREMENTING ===== */
         /* DEX → Decrement X */
@@ -650,7 +768,19 @@ struct CPU
         INS_INX = 0xE8,
         
         /* INY → Increment Y */
-        INS_INY = 0xC8;
+        INS_INY = 0xC8,
+
+        /* DEC → decrements the value held at a specific memory location */
+        INS_DEC_ZP = 0xC6,
+        INS_DEC_ZPX = 0xD6,
+        INS_DEC_ABS = 0xCE,
+        INS_DEC_ABSX = 0xDE,
+
+        /* INC → increments the value held at a specific memory location */
+        INS_INC_ZP = 0xE6,
+        INS_INC_ZPX = 0xF6,
+        INS_INC_ABS = 0xEE,
+        INS_INC_ABSX = 0xFE;
 
     void LDSetStatus()
     {
@@ -671,18 +801,28 @@ int main()
     memory.Initialize();
 
     /* Instructions */
-    memory[0x8000] = CPU::INS_LDA_IM;
+    memory[0x8000] = CPU::INS_LDA_IM;   // 2
     memory[0x8001] = 0x30;
-    memory[0x8002] = CPU::INS_STA_ABSX;
-    memory[0x8003] = 0x57;
-    memory[0x8004] = 0x15;
+
+    memory[0x8002] = CPU::INS_LDX_IM;   // 2
+    memory[0x8003] = 0x50;
+
+    memory[0x8004] = CPU::INS_STA_ZP;   // 3
+    memory[0x8005] = 0x57;
+
+    memory[0x8006] = CPU::INS_STX_ZP;   // 3
+    memory[0x8007] = 0x58;
+
+    memory[0x8008] = CPU::INS_DEC_ZP;   // 5
+    memory[0x8009] = 0x58;
+
+    memory[0x800A] = CPU::INS_INC_ZP;   // 5
+    memory[0x800B] = 0x57;
+    // memory[0x8009] = 0x15;
 
     /* Point the Reset Vector (0xFFFC/0xFFFD) to the program's start address */
     memory[0xFFFC] = 0x00;
     memory[0xFFFD] = 0x80;
-
-    /* Other memory locations */
-    memory[0x30] = 0x15;
 
     /* Initializing CPU */
     CPU cpu;
@@ -690,7 +830,7 @@ int main()
     cpu.X = 0x05;
 
     /* Execution */
-    cpu.Execute(2, memory);
+    cpu.Execute(20, memory);
 
     /* Debugging */
     memory.Debug(0xFFF0, 0xFFFF);

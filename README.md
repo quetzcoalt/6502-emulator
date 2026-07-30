@@ -43,3 +43,4 @@ The CPU can address a maximum of 64 KB of  addresses due to its 16-bit address b
 
 ## TO-DOs later
 - [ ] LDA, LDX and LDY share common implementations → Implementing a common function for each instruction depending on the addressing mode.
+- [ ] Taking care of overflows and underflows.
