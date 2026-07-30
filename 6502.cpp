@@ -408,6 +408,62 @@ struct CPU
 
                     memory[AddressValue] = A;
                 } break;
+
+
+
+                /* ---------- STX ---------- */
+                case INS_STX_ZP:    /* 3 cycles */
+                {
+                    Byte zeroPageAddress = FetchByte(cycles, memory);
+                    memory[zeroPageAddress] = X;
+                    cycles--;
+                } break;
+                case INS_STX_ZPY:   /* 4 cycles */
+                {
+                    Byte zeroPageAddress = FetchByte(cycles, memory);
+                    
+                    zeroPageAddress += Y;
+                    cycles--; 
+
+                    memory[zeroPageAddress] = X;
+                    cycles--; 
+                } break;
+                case INS_STX_ABS:   /* 4 cycles */
+                {
+                    Word Address = FetchWord(cycles, memory);
+                
+                    memory[Address] = X;
+                    cycles--;
+                } break;
+
+
+
+
+                /* ---------- STY ---------- */
+                case INS_STY_ZP:    /* 3 cycles */
+                {
+                    Byte zeroPageAddress = FetchByte(cycles, memory);
+                    memory[zeroPageAddress] = Y;
+                    cycles--;
+                } break;
+                case INS_STY_ZPX:   /* 4 cycles */
+                {
+                    Byte zeroPageAddress = FetchByte(cycles, memory);
+                    
+                    zeroPageAddress += X;
+                    cycles--; 
+
+                    memory[zeroPageAddress] = Y;
+                    cycles--; 
+                } break;
+                case INS_STY_ABS:   /* 4 cycles */
+                {
+                    Word Address = FetchWord(cycles, memory);
+                
+                    memory[Address] = Y;
+                    cycles--;
+                } break;
+
                 default:
                 {
                     /* TODO: Exception object */
@@ -497,7 +553,17 @@ struct CPU
         INS_STA_ABSX = 0x9D,
         INS_STA_ABSY = 0x99,
         INS_STA_INDX = 0x81,
-        INS_STA_INDY = 0x91;
+        INS_STA_INDY = 0x91,
+
+        /* STX → Stores the contents of the X register into memory. */
+        INS_STX_ZP = 0x86,
+        INS_STX_ZPY = 0x96,
+        INS_STX_ABS = 0x8E,
+
+        /* STY → Stores the contents of the Y register into memory. */
+        INS_STY_ZP = 0x84,
+        INS_STY_ZPX = 0x94,
+        INS_STY_ABS = 0x8C;
 
     void LDSetStatus()
     {
