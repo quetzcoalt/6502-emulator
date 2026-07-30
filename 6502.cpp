@@ -468,27 +468,59 @@ struct CPU
 
 
                 /* ---------- TRANSFER BETWEEN REGISTERS ---------- */
-                case INS_TAX:
+                case INS_TAX:       /* 2 cycles */
                 {
                     X = A;
+                    cycles--;
                     LDSetStatus();
                 } break;
-                case INS_TAY:
+                case INS_TAY:       /* 2 cycles */
                 {
                     Y = A;
+                    cycles--;
                     LDSetStatus();
                 } break;
-                case INS_TXA:
+                case INS_TXA:       /* 2 cycles */
                 {
                     A = X;
+                    cycles--;
                     LDSetStatus();
                 } break;
-                case INS_TYA:
+                case INS_TYA:       /* 2 cycles */
                 {
                     A = Y;
+                    cycles--;
                     LDSetStatus();
                 } break;
 
+
+
+
+                /* ---------- INCREMENTING AND DECREMENTING ---------- */
+                case INS_DEX:       /* 2 cycles */
+                {
+                    X--;
+                    cycles--;
+                    LDSetStatus();
+                } break;
+                case INS_DEY:       /* 2 cycles */
+                {
+                    Y--;
+                    cycles--;
+                    LDSetStatus();
+                } break;
+                case INS_INX:       /* 2 cycles */
+                {
+                    X++;
+                    cycles--;
+                    LDSetStatus();
+                } break;
+                case INS_INY:       /* 2 cycles */
+                {
+                    Y++;
+                    cycles--;
+                    LDSetStatus();
+                } break;
                 default:
                 {
                     /* TODO: Exception object */
@@ -547,6 +579,8 @@ struct CPU
 
     // opcodes
     static constexpr Byte
+        /* ===== LOAD FROM MEMORY ===== */
+
         /* LDA → Loads a byte of memory into the accumulator, setting zero and negative flags as appropriate */
         INS_LDA_IM = 0xA9,
         INS_LDA_ZP = 0xA5,
@@ -571,6 +605,8 @@ struct CPU
         INS_LDY_ABS = 0xAC,
         INS_LDY_ABSX = 0xBC,
 
+        /* ===== STORE TO MEMORY ===== */
+        +
         /* STA → Stores the contents of the accumulator into memory. */
         INS_STA_ZP = 0x85,
         INS_STA_ZPX = 0x95,
@@ -590,17 +626,31 @@ struct CPU
         INS_STY_ZPX = 0x94,
         INS_STY_ABS = 0x8C.
 
-        /* TAX → Content from A to X register, implied mode only */
+        /* ===== MOVE DATA BETWEEN REGISTERS ===== */
+        /* TAX → Content from A to X register */
         INS_TAX = 0xAA,
 
-        /* TAY → Content from A to Y register, implied mode only */
+        /* TAY → Content from A to Y register */
         INS_TAY = 0xA8,
 
-        /* TXA → Content from X to A register, implied mode only */
+        /* TXA → Content from X to A register */
         INS_TXA = 0x8A,
 
-        /* TYA → Content from Y to A register, implied mode only */
-        INS_TAY = 0x98;
+        /* TYA → Content from Y to A register */
+        INS_TAY = 0x98,
+
+        /* ===== INCREMENTING AND DECREMENTING ===== */
+        /* DEX → Decrement X */
+        INS_DEX = 0xCA,
+
+        /* DEY → Decrement Y */
+        INS_DEY = 0x88,
+        
+        /* INX → Increment X */
+        INS_INX = 0xE8,
+        
+        /* INY → Increment Y */
+        INS_INY = 0xC8;
 
     void LDSetStatus()
     {
