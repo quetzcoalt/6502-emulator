@@ -3,12 +3,13 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
+#include <bitset>
 
 using namespace std;
 
 // using uint8_t = unsigned char;     // 1 uint8_t
 // using uint16_t = unsigned short;    // 2 bytes
-// using uint32_t = unsigned int;       // 4 bytes
+// using int32_t = unsigned int;       // 4 bytes
 
 #define NORMAL  "\x1B[0m"
 #define RED  "\x1B[31m"
@@ -29,22 +30,22 @@ uint8_t RESET_VECTOR = 0xFFFC;
 
 struct Memory
 {
-    static constexpr uint32_t MAX_MEMORY = 1024 * 64;
-    static constexpr uint32_t ZERO_PAGE_SIZE = 256;
+    static constexpr int32_t MAX_MEMORY = 1024 * 64;
+    static constexpr int32_t ZERO_PAGE_SIZE = 256;
     uint8_t Data[MAX_MEMORY];
 
     void Initialize()
     {
-        for (uint32_t i = 0; i < MAX_MEMORY; i++)
+        for (int32_t i = 0; i < MAX_MEMORY; i++)
         {
             Data[i] = 0;
         }
     }
 
-    void Debug(uint32_t start, uint32_t end)
+    void Debug(int32_t start, int32_t end)
     {
         int counter = 0;
-        for (uint32_t i = start; i < end; i++)
+        for (int32_t i = start; i < end; i++)
         {
             printf("[0x%04X:0x%04X]  ",i, Data[i]);
             
@@ -59,9 +60,9 @@ struct Memory
     void DebugZeroPage()
     {
         printf("\n ---- ZERO PAGE MEMORY ---- \n");
-        for (uint32_t i = 0; i < ZERO_PAGE_SIZE; i++)
+        for (int32_t i = 0; i < ZERO_PAGE_SIZE; i++)
         {
-            uint32_t val = Data[i];
+            int32_t val = Data[i];
             
             if (val == 0)
                 printf("%02X ", Data[i]);
@@ -73,17 +74,17 @@ struct Memory
     }
 
     /* read 1 uint8_t */
-    uint8_t operator[](uint32_t address) const {
+    uint8_t operator[](int32_t address) const {
         return Data[address];
     }
 
     /* write 1 uint8_t */
-    uint8_t& operator[](uint32_t address) {
+    uint8_t& operator[](int32_t address) {
         return Data[address];
     }
 
     /* write 2 bytes */
-    uint16_t writeWord(uint16_t Value, uint32_t Address, uint32_t cycles) {
+    uint16_t writeWord(uint16_t Value, int32_t Address, int32_t cycles) {
         Data[Address] = Value & 0xFF;
         Data[Address + 1] = (Value >> 8);
 
@@ -101,18 +102,18 @@ struct CPU
 
     // Status register
     /*
-     * [0] N → negative
-     * [1] V → overflow
-     * [2] B → break
+     * [0] C → carry
+     * [1] Z → zero
+     * [2] I → interrupt disable
      * [3] D → decimal
-     * [4] I → interrupt disable
+     * [4] B → break
      * [5] unused, forced to 1 when something is pushed to the stack
-     * [6] Z → zero
-     * [7] C → carry
+     * [6] V → overflow
+     * [7] N → negative
     */
     uint8_t P;
 
-    void Reset(uint32_t cycles, Memory& memory)
+    void Reset(int32_t cycles, Memory& memory)
     {
         uint16_t ResetVector = 0xFFFC;
         PC = ReadWord(cycles, ResetVector, memory);
@@ -122,21 +123,28 @@ struct CPU
     }
     
     /* Insert program into memory */
-    void MountProgram(vector<uint8_t> instructions, Memory& memory) {
-        uint32_t StartAddress = PC;
+    void MountProgram(vector<uint32_t> instructions, Memory& memory, int32_t cycles) {
+        int32_t StartAddress = PC;
         
         for (uint8_t ins : instructions) {
-            memory[StartAddress] = ins;
-            StartAddress++; 
+            if (cycles > 0) {
+                memory[StartAddress] = ins;
+                StartAddress++;
+                cycles--;
+            }
         }
     }
 
-    void Execute(uint32_t cycles, Memory& memory)
+    void Execute(int32_t cycles, Memory& memory)
     {
         while (cycles > 0) {
             uint8_t instruction = FetchByte(cycles, memory);
-            printf("The current instruction is %04X\n", instruction);
             
+            if (instruction == 0) {
+                printf("\e%sEOF!\e[0m\n", GREEN);
+                return;
+            }
+
             switch (instruction)
             {
                 /* -------------------- LDA -------------------- */
@@ -205,7 +213,7 @@ struct CPU
 
                     LDSetStatus();
                 } break;
-                case INS_LDA_INDX:  /* 6 cycles */
+                case INS_LDA_IDX:  /* 6 cycles */
                 {
                     // LDA ($40,X)
                     uint8_t Address = FetchByte(cycles, memory);
@@ -218,7 +226,7 @@ struct CPU
 
                     LDSetStatus();
                 } break;
-                case INS_LDA_INDY:  /* 5 cycles (+1 if page crossed) */
+                case INS_LDA_IDY:  /* 5 cycles (+1 if page crossed) */
                 {
                     // LDA ($40),Y
                     uint8_t Address = FetchByte(cycles, memory);
@@ -397,7 +405,7 @@ struct CPU
                     memory[Address] = A;
                     cycles--;
                 } break;
-                case INS_STA_INDX:
+                case INS_STA_IDX:
                 {
                     // STA ($40,X)
                     uint8_t Address = FetchWord(cycles, memory);
@@ -409,7 +417,7 @@ struct CPU
 
                     memory[AddressValue] = A;
                 } break;
-                case INS_STA_INDY:
+                case INS_STA_IDY:
                 {
                     // STA ($40),Y
                     uint8_t Address = FetchWord(cycles, memory);
@@ -654,18 +662,179 @@ struct CPU
                     memory[Address] = Value;
                     cycles--;
                 } break;
+
+
+
+
+                /* ---------- BRANCHING ---------- */
+                case INS_BNE:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
+                {
+                    uint16_t oldPC = PC;
+                    if ((P & 0b00000010) == 0) {
+                        uint8_t address = FetchByte(cycles, memory);
+                        PC += 1 + address;
+                        cycles--;
+
+                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    }
+                } break;
+                case INS_BEQ:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
+                {
+                    uint16_t oldPC = PC;
+                    if ((P & 0b00000010) == 0b00000010) {
+                        uint8_t address = FetchByte(cycles, memory);
+                        PC += 1 + address;
+                        cycles--;
+
+                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    }
+                } break;
+                case INS_BPL:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
+                {
+                    uint16_t oldPC = PC;
+                    if ((P & 0b10000000) == 0) {
+                        uint8_t address = FetchByte(cycles, memory);
+                        PC += 1 + address;
+                        cycles--;
+
+                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    }
+                } break;
+                case INS_BMI:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
+                {
+                    uint16_t oldPC = PC;
+                    if ((P & 0b10000000) == 0b10000000) {
+                        uint8_t address = FetchByte(cycles, memory);
+                        PC += 1 + address;
+                        cycles--;
+
+                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    }
+                } break;
+                case INS_BCC:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
+                {
+                    uint16_t oldPC = PC;
+                    if ((P & 0b00000001) == 0) {
+                        uint8_t address = FetchByte(cycles, memory);
+                        PC += 1 + address;
+                        cycles--;
+
+                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    }
+                } break;
+                case INS_BCS:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
+                {
+                    uint16_t oldPC = PC;
+                    if ((P & 0b00000001) == 0b00000001) {
+                        uint8_t address = FetchByte(cycles, memory);
+                        PC += 1 + address;
+                        cycles--;
+
+                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    }
+                } break;
+                case INS_BVC:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
+                {
+                    uint16_t oldPC = PC;
+                    if ((P & 0b01000000) == 0) {
+                        uint8_t address = FetchByte(cycles, memory);
+                        PC += 1 + address;
+                        cycles--;
+
+                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    }
+                } break;
+                case INS_BVS:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
+                {
+                    uint16_t oldPC = PC;
+                    if ((P & 0b01000000) == 0b01000000) {
+                        uint8_t address = FetchByte(cycles, memory);
+                        PC += 1 + address;
+                        cycles--;
+
+                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    }
+                } break;
+
+
+
+
+                /* ---------- COMPARISON ---------- */
+                /* CMP */
+                case INS_CMP_IM:
+                {
+
+                } break;
+                case INS_CMP_ZP:
+                {
+
+                } break;
+                case INS_CMP_ZPX:
+                {
+
+                } break;
+                case INS_CMP_ABS:
+                {
+
+                } break;
+                case INS_CMP_ABSX:
+                {
+
+                } break;
+                case INS_CMP_ABSY:
+                {
+
+                } break;
+                case INS_CMP_IDX:
+                {
+
+                } break;
+                case INS_CMP_IDY:
+                {
+
+                } break;
+
+                /* CPX */
+                case INS_CPX_IM:
+                {
+
+                } break;
+                case INS_CPX_ZP:
+                {
+
+                } break;
+                case INS_CPX_ABS:
+                {
+
+                } break;
+
+                /* CPY */
+                case INS_CPY_IM:
+                {
+
+                } break;
+                case INS_CPY_ZP:
+                {
+
+                } break;
+                case INS_CPY_ABS:
+                {
+
+                } break;
+
                 default:
                 {
                     /* TODO: Exception object */
                     printf("Instruction not handled %d", instruction);
 
+                    
                     cycles--;
                 } break;
             }
         }
     }
 
-    uint8_t FetchByte(uint32_t& cycles, Memory &memory) {
+    uint8_t FetchByte(int32_t& cycles, Memory &memory) {
         uint8_t Data = memory[PC];
         PC++;
         cycles--;
@@ -674,7 +843,7 @@ struct CPU
     }
 
     /* Same as the previous function but doesn't increment the program counter */
-    uint8_t ReadByte(uint32_t& cycles, uint32_t address, Memory &memory) {
+    uint8_t ReadByte(int32_t& cycles, int32_t address, Memory &memory) {
         uint8_t Data = memory[address];
         printf("The uint8_t read is %04X\n", Data);
         cycles--;
@@ -683,7 +852,7 @@ struct CPU
     }
 
     /* TODO: adding a swap uint8_t function depending on whether the platform is little or big endian. */
-    uint16_t FetchWord(uint32_t& cycles, Memory &memory) {
+    uint16_t FetchWord(int32_t& cycles, Memory &memory) {
         /* 6502 is little endian */
         uint16_t Data = memory[PC];         /* Lower uint8_t */
         PC++;
@@ -696,7 +865,7 @@ struct CPU
         return Data;
     }
 
-    uint16_t ReadWord(uint32_t& cycles, uint32_t address, Memory &memory) {
+    uint16_t ReadWord(int32_t& cycles, int32_t address, Memory &memory) {
         /* 6502 is little endian */
         uint16_t Data = memory[address];            /* Lower uint8_t */
         printf("Address being read is: %04X, with value: %04X\n", address, Data);
@@ -721,8 +890,8 @@ struct CPU
         INS_LDA_ABS = 0xAD,
         INS_LDA_ABSX = 0xBD,
         INS_LDA_ABSY = 0xB9,
-        INS_LDA_INDX = 0xA1,
-        INS_LDA_INDY = 0xB1,
+        INS_LDA_IDX = 0xA1,
+        INS_LDA_IDY = 0xB1,
 
         /* LDX → Loads a uint8_t of memory into the X register, setting the zero and negative flags as appropriate. */
         INS_LDX_IM = 0xA2,
@@ -746,8 +915,8 @@ struct CPU
         INS_STA_ABS = 0x8D,
         INS_STA_ABSX = 0x9D,
         INS_STA_ABSY = 0x99,
-        INS_STA_INDX = 0x81,
-        INS_STA_INDY = 0x91,
+        INS_STA_IDX = 0x81,
+        INS_STA_IDY = 0x91,
 
         /* STX → Stores the contents of the X register into memory. */
         INS_STX_ZP = 0x86,
@@ -795,7 +964,42 @@ struct CPU
         INS_INC_ZP = 0xE6,
         INS_INC_ZPX = 0xF6,
         INS_INC_ABS = 0xEE,
-        INS_INC_ABSX = 0xFE;
+        INS_INC_ABSX = 0xFE,
+
+        /* ===== BRANCHING ===== */
+        INS_BNE = 0xD0,
+        INS_BEQ = 0xF0,
+        INS_BPL = 0x10,
+        INS_BMI = 0x30,
+        INS_BCC = 0x90,
+        INS_BCS = 0xB0,
+        INS_BVC = 0x50,
+        INS_BVS = 0x70,
+
+        /* ===== COMPARISON ===== */
+        /*
+         * Sets C, Z and N flags.
+        */
+
+        /* CMP → Compares the contents of the accumulator with another memory held value*/
+        INS_CMP_IM = 0xC9,
+        INS_CMP_ZP = 0xC5,
+        INS_CMP_ZPX = 0xD5,
+        INS_CMP_ABS = 0xCD,
+        INS_CMP_ABSX = 0xDD,
+        INS_CMP_ABSY = 0xD9,
+        INS_CMP_IDX = 0xC1,
+        INS_CMP_IDY = 0xD1,
+
+        /* CPX → Compares the contents of the X register with another memory held value */
+        INS_CPX_IM = 0xE0,
+        INS_CPX_ZP = 0xE4,
+        INS_CPX_ABS = 0xEC,
+        
+        /* CPY → Compares the contents of the Y register with another memory held value */
+        INS_CPY_IM = 0xC0,
+        INS_CPY_ZP = 0xC4,
+        INS_CPY_ABS = 0xCC;
 
     void LDSetStatus()
     {
@@ -804,7 +1008,7 @@ struct CPU
     }
 
     void Debug() {
-        printf("A: %04X\nX: %04X\nY: %04X", A, X, Y);
+        printf("A: %04X\nX: %04X\nY: %04X\nPC: %08X\n", A, X, Y, PC);
     }
 };
 
@@ -816,31 +1020,31 @@ int main()
     memory.Initialize();
 
     /* Instructions */
-    vector<uint8_t> instructions = {
-        CPU::INS_LDA_IM, 0x30,  // 2
-        CPU::INS_LDX_IM, 0x50,  // 2
-        CPU::INS_STA_ZP, 0x57,  // 3
-        CPU::INS_STX_ZP, 0x58,  // 3
-        CPU::INS_DEC_ZP, 0x58,  // 5
-        CPU::INS_INC_ZP, 0x57   // 5
+    vector<uint32_t> instructions = {
+        CPU::INS_BEQ, 0xFF,             // 3
+        CPU::INS_LDA_ZP, 0x30,          // 3
+        CPU::INS_LDX_ZP, 0x50,          // 3
     };
 
     /* Point the Reset Vector (0xFFFC/0xFFFD) to the program's start address */
     memory[0xFFFC] = 0x00;
     memory[0xFFFD] = 0x80;
 
+    // memory[0x0030] = 0x30;
+    // memory[0x0050] = 0x50;
+
     /* Initializing CPU */
     CPU cpu;
     cpu.Reset(2, memory);
-    cpu.MountProgram(instructions, memory);
+    cpu.MountProgram(instructions, memory, instructions.size());
     cpu.X = 0x05;
+    cpu.P = 0;
 
     /* Execution */
-    cpu.Execute(20, memory);
+    cpu.Execute(4, memory);
 
     /* Debugging */
-    memory.Debug(0xFFF0, 0xFFFF);
-    memory.Debug(0x1555, 0x1565);
+    // memory.Debug(0x1055, 0x1065);
     cpu.Debug();
     memory.DebugZeroPage();
 
