@@ -158,7 +158,7 @@ struct CPU
                 case INS_LDA_ZP:    /* 3 cycles */
                 {
                     uint8_t zeroPageAddress = FetchByte(cycles, memory);
-                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+                    int8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
                     A = zeroPageValue;
 
                     LDSetStatus();
@@ -761,17 +761,42 @@ struct CPU
 
                 /* ---------- COMPARISON ---------- */
                 /* CMP */
-                case INS_CMP_IM:
+                case INS_CMP_IM:        // 2 cycles
                 {
+                    int8_t value = FetchByte(cycles, memory);
+                    int8_t difference = A - value;
 
+                    if (difference > 0)
+                    {
+                        P |= 0b00000001;
+                    } else if (difference == 0)  {
+                        P |= 0b00000011;
+                    } else {
+                        P |= 0b10000000;
+                    }
                 } break;
-                case INS_CMP_ZP:
+                case INS_CMP_ZP:        // 3 cycles
                 {
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);
+                    int8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
 
+                    int8_t difference = A - zeroPageValue;
+
+                    if (difference > 0)
+                    {
+                        P |= 0b00000001;
+                    } else if (difference == 0)  {
+                        P |= 0b00000011;
+                    } else {
+                        P |= 0b10000000;
+                    }
                 } break;
                 case INS_CMP_ZPX:
                 {
+                    uint8_t zeroPageValue = FetchByte(cycles, memory);
+                    zeroPageValue += X;
 
+                    int8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
                 } break;
                 case INS_CMP_ABS:
                 {
