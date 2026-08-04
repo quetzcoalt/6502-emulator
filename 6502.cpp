@@ -183,7 +183,7 @@ struct CPU
                 } break;
                 case INS_LDA_ABS:   /* 4 cycles */
                 {
-                    uint8_t Address = FetchWord(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);
                     uint8_t AddressValue = ReadByte(cycles, Address, memory);
 
                     A = AddressValue;
@@ -191,25 +191,33 @@ struct CPU
                 } break;
                 case INS_LDA_ABSX:  /* 4 cycles (+1 if page crossed) */
                 {
-                    uint8_t Address = FetchWord(cycles, memory);
-                    Address += X;
-                    cycles--;
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint16_t TargetAddress = Address + X;
 
-                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
+                    if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+                    {
+                        cycles--;
+                    }
 
-                    A = AddressValue;
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
+
+                    A = TargetAddress;
 
                     LDSetStatus();
                 } break;
                 case INS_LDA_ABSY:  /* 4 cycles (+1 if page crossed) */
                 {
                     uint16_t Address = FetchWord(cycles, memory);
-                    Address += Y;
-                    cycles--;
+                    uint16_t TargetAddress = Address + Y;
 
-                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
+                    if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+                    {
+                        cycles--;
+                    }
 
-                    A = AddressValue;
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
+
+                    A = TargetAddress;
 
                     LDSetStatus();
                 } break;
@@ -222,7 +230,7 @@ struct CPU
                     cycles--;
 
                     uint16_t AddressValue = ReadWord(cycles, Address, memory);
-                    A = memory[AddressValue];
+                    A = ReadByte(cycles, Address, memory);
 
                     LDSetStatus();
                 } break;
@@ -232,11 +240,14 @@ struct CPU
                     uint8_t Address = FetchByte(cycles, memory);
                     uint16_t AddressValue = ReadWord(cycles, Address, memory);
 
-                    AddressValue += Y;
-                    cycles--;
+                    uint16_t TargetAddress = AddressValue + Y;
 
-                    uint16_t FinalValue = ReadWord(cycles, AddressValue, memory);
-                    A = FinalValue;
+                    if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+                    {
+                        cycles--;
+                    }
+
+                    A = ReadByte(cycles, TargetAddress, memory);;
 
                     LDSetStatus();
                 } break;
@@ -289,10 +300,14 @@ struct CPU
                 case INS_LDX_ABSY:  /* 4 cycles (+1 if page crossed) */
                 {
                     uint16_t Address = FetchWord(cycles, memory);
-                    Address += Y;
-                    cycles--;
+                    uint16_t TargetAddress = Address + Y;
 
-                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
+                    if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+                    {
+                        cycles--;
+                    }
+
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
 
                     X = AddressValue;
 
@@ -347,10 +362,14 @@ struct CPU
                 case INS_LDY_ABSX:  /* 4 cycles (+1 if page crossed) */
                 {
                     uint16_t Address = FetchWord(cycles, memory);
-                    Address += X;
-                    cycles--;
+                    uint16_t TargetAddress = Address + X;
 
-                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
+                    if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+                    {
+                        cycles--;
+                    }
+
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
 
                     Y = AddressValue;
 
@@ -761,90 +780,135 @@ struct CPU
 
                 /* ---------- COMPARISON ---------- */
                 /* CMP */
-                case INS_CMP_IM:        // 2 cycles
+                case INS_CMP_IM:        /* 2 cycles */
                 {
                     int8_t value = FetchByte(cycles, memory);
-                    int8_t difference = A - value;
 
-                    if (difference > 0)
-                    {
-                        P |= 0b00000001;
-                    } else if (difference == 0)  {
-                        P |= 0b00000011;
-                    } else {
-                        P |= 0b10000000;
-                    }
+                    CMPSetStatus(A - value);
                 } break;
-                case INS_CMP_ZP:        // 3 cycles
+                case INS_CMP_ZP:        /* 3 cycles */
                 {
                     uint8_t zeroPageAddress = FetchByte(cycles, memory);
                     int8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
 
-                    int8_t difference = A - zeroPageValue;
-
-                    if (difference > 0)
-                    {
-                        P |= 0b00000001;
-                    } else if (difference == 0)  {
-                        P |= 0b00000011;
-                    } else {
-                        P |= 0b10000000;
-                    }
+                    CMPSetStatus(A - zeroPageValue);
                 } break;
-                case INS_CMP_ZPX:
+                case INS_CMP_ZPX:       /* 4 cycles */
                 {
-                    uint8_t zeroPageValue = FetchByte(cycles, memory);
-                    zeroPageValue += X;
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);
+                    
+                    zeroPageAddress += X;
+                    cycles--;
 
                     int8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
-                } break;
-                case INS_CMP_ABS:
-                {
 
+                    CMPSetStatus(A - zeroPageValue);
                 } break;
-                case INS_CMP_ABSX:
+                case INS_CMP_ABS:       /* 4 cycles */
                 {
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
 
+                    CMPSetStatus(A - AddressValue);
                 } break;
-                case INS_CMP_ABSY:
+                case INS_CMP_ABSX:      /* 4 (+1 if page crossed) */
                 {
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint16_t TargetAddress = Address + X;
 
+                    if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+                    {
+                        cycles--;
+                    }
+
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
+
+                    CMPSetStatus(A - AddressValue);
                 } break;
-                case INS_CMP_IDX:
+                case INS_CMP_ABSY:      /* 4 (+1 if page crossed) */
                 {
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint16_t TargetAddress = Address + Y;
 
+                    if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+                    {
+                        cycles--;
+                    }
+
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
+
+                    CMPSetStatus(A - AddressValue);
                 } break;
-                case INS_CMP_IDY:
+                case INS_CMP_IDX:       /* 6 cycles → low and high addresses are in the zero page */
                 {
+                    uint8_t Address = FetchByte(cycles, memory);
 
+                    Address += X;       /* Carry discarded */
+                    cycles--;
+
+                    uint16_t AddressValue = ReadWord(cycles, Address, memory);
+                    uint8_t Value = ReadByte(cycles, AddressValue, memory);
+
+                    CMPSetStatus(A - Value);
+                } break;
+                case INS_CMP_IDY:       /* 5 cycles (+1 if page crossed) */
+                {
+                    uint8_t Address = FetchByte(cycles, memory);
+                    uint16_t TargetAddress = AddressValue + Y;      /* Carry not discarded*/
+
+                    if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+                    {
+                        cycles--;
+                    }
+
+                    uint16_t AddressValue = ReadWord(cycles, Address, memory);
+                    uint8_t Value = ReadByte(cycles, AddressValue, memory);
+
+                    CMPSetStatus(A - Value);
                 } break;
 
                 /* CPX */
-                case INS_CPX_IM:
+                case INS_CPX_IM:        /* 2 cycles */
                 {
+                    int8_t value = FetchByte(cycles, memory);
 
+                    CMPSetStatus(X - value);
                 } break;
-                case INS_CPX_ZP:
+                case INS_CPX_ZP:        /* 3 cycles */
                 {
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);
+                    int8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
 
+                    CMPSetStatus(X - zeroPageValue);
                 } break;
-                case INS_CPX_ABS:
+                case INS_CPX_ABS:       /* 4 cycles */
                 {
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
 
+                    CMPSetStatus(X - AddressValue);
                 } break;
 
                 /* CPY */
-                case INS_CPY_IM:
+                case INS_CPY_IM:        /* 2 cycles */
                 {
+                    int8_t value = FetchByte(cycles, memory);
 
+                    CMPSetStatus(Y - value);
                 } break;
-                case INS_CPY_ZP:
+                case INS_CPY_ZP:        /* 3 cycles */
                 {
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);
+                    int8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
 
+                    CMPSetStatus(Y - zeroPageValue);
                 } break;
-                case INS_CPY_ABS:
+                case INS_CPY_ABS:       /* 4 cycles */
                 {
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
 
+                    CMPSetStatus(Y - AddressValue);
                 } break;
 
                 default:
@@ -1030,6 +1094,18 @@ struct CPU
     {
         P |= ((A == 0) << 5);
         P |= (((A & 0b10000000) > 0) << 0);
+    }
+
+    void CMPSetStatus(uint8_t difference)
+    {
+        if (difference > 0)
+        {
+            P |= 0b00000001;
+        } else if (difference == 0)  {
+            P |= 0b00000011;
+        } else {
+            P |= 0b10000000;
+        }
     }
 
     void Debug() {
