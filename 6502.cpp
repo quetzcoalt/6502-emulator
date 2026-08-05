@@ -84,9 +84,9 @@ struct Memory
     }
 
     /* write 2 bytes */
-    uint16_t writeWord(uint16_t Value, int32_t Address, int32_t cycles) {
+    uint16_t WriteWord(uint16_t Value, int32_t Address, int32_t& cycles) {
         Data[Address] = Value & 0xFF;
-        Data[Address + 1] = (Value >> 8);
+        Data[Address + 1] |= (Value >> 8);
 
         cycles -= 2;
     }
@@ -854,7 +854,7 @@ struct CPU
                 case INS_CMP_IDY:       /* 5 cycles (+1 if page crossed) */
                 {
                     uint8_t Address = FetchByte(cycles, memory);
-                    uint16_t TargetAddress = AddressValue + Y;      /* Carry not discarded*/
+                    uint16_t TargetAddress = Address + Y;      /* Carry not discarded*/
 
                     if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
                     {
@@ -911,6 +911,31 @@ struct CPU
                     CMPSetStatus(Y - AddressValue);
                 } break;
 
+
+
+
+                /* ---------- JUMPS ---------- */
+                case INS_JMP_ABS:       /* 3 cycles */
+                {
+                    uint16_t Address = FetchWord(cycles, memory);
+                    PC = Address;
+                } break;
+                case INS_JMP_ID:        /* 5 cycles */
+                {
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint16_t FinalAddress = ReadWord(cycles, Address, memory);
+                    PC = FinalAddress;
+                } break;
+                case INS_JSR:       /* 6 cycles */
+                {
+                    uint16_t Address = FetchWord(cycles, memory); // 3
+                    
+                    memory.WriteWord(PC - 1, S, cycles); // 5
+                    S--;
+
+                    PC = Address;
+                    cycles--;
+                } break;
                 default:
                 {
                     /* TODO: Exception object */
@@ -941,6 +966,10 @@ struct CPU
     }
 
     /* TODO: adding a swap uint8_t function depending on whether the platform is little or big endian. */
+    
+    /* Also, I wanna mention that the "Word" here refers to 2 Bytes and does not refer to the CPU
+       architecture which is 8-bit.
+    */
     uint16_t FetchWord(int32_t& cycles, Memory &memory) {
         /* 6502 is little endian */
         uint16_t Data = memory[PC];         /* Lower uint8_t */
@@ -1088,7 +1117,15 @@ struct CPU
         /* CPY → Compares the contents of the Y register with another memory held value */
         INS_CPY_IM = 0xC0,
         INS_CPY_ZP = 0xC4,
-        INS_CPY_ABS = 0xCC;
+        INS_CPY_ABS = 0xCC,
+
+        /* ===== JUMPS ===== */
+        /* JMP → Sets PC to the address specified by the operand. */
+        INS_JMP_ABS = 0x4C,
+        INS_JMP_ID = 0x6C,
+
+        /* JSR → Pushes (address - 1) of the return point to the stack, and sets PC to the target memory address  */
+        INS_JSR = 0x20;
 
     void LDSetStatus()
     {
