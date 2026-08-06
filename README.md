@@ -79,15 +79,15 @@ I make sure to implement the instructions in all their possible memory addressin
       <td width="7%"><p><input type="checkbox" checked> INC</p></td>
       <td width="7%"><p><input type="checkbox" checked> INX</p></td>
       <td width="7%"><p><input type="checkbox" checked> INY</p></td>
-      <td width="7%"><p><input type="checkbox"> JMP</p></td>
+      <td width="7%"><p><input type="checkbox" checked> JMP</p></td>
     </tr>
     <tr>
-      <td width="7%" height="25"><p><input type="checkbox"> JSR</p></td>
+      <td width="7%" height="25"><p><input type="checkbox" checked> JSR</p></td>
       <td width="7%"><p><input type="checkbox" checked> LDA</p></td>
       <td width="7%"><p><input type="checkbox" checked> LDX</p></td>
       <td width="7%"><p><input type="checkbox" checked> LDY</p></td>
       <td width="7%"><p><input type="checkbox"> LSR</p></td>
-      <td width="7%"><p><input type="checkbox"> NOP</p></td>
+      <td width="7%"><p><input type="checkbox" checked> NOP</p></td>
       <td width="7%"><p><input type="checkbox"> ORA</p></td>
       <td width="7%"><p><input type="checkbox"> PHA</p></td>
       <td width="7%"><p><input type="checkbox"> PHP</p></td>
@@ -98,7 +98,7 @@ I make sure to implement the instructions in all their possible memory addressin
       <td width="7%"><p><input type="checkbox"> RTI</p></td>
     </tr>
     <tr>
-      <td width="7%" height="25"><p><input type="checkbox"> RTS</p></td>
+      <td width="7%" height="25"><p><input type="checkbox" checked> RTS</p></td>
       <td width="7%"><p><input type="checkbox"> SBC</p></td>
       <td width="7%"><p><input type="checkbox"> SEC</p></td>
       <td width="7%"><p><input type="checkbox"> SED</p></td>
