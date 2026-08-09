@@ -8,7 +8,7 @@
             "name": "C/C++ Debug: Launch with GDB",
             "type": "cppdbg",
             "request": "launch",
-            "program": "C:/Users/Imane/Documents/Code/6502-emulator/a.exe",
+            "program": "C:/Users/Archaeopteryx/Documents/Code/6502-emulator/a.exe",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",

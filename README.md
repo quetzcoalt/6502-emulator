@@ -119,3 +119,10 @@ I make sure to implement the instructions in all their possible memory addressin
 ## Todo later
 - [ ] LDA, LDX and LDY share common implementations → Implementing a common function for each instruction depending on the addressing mode.
 - [ ] Taking care of overflows and underflows.
+
+## To run tests
+
+```bash
+cmake --build build
+cd build && ctest
+```

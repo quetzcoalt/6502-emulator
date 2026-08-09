@@ -8,43 +8,38 @@ int main()
 
     /* Instructions */
     vector<uint32_t> instructions = {
-        CPU::INS_JSR, 0x18, 0x03,   // 6
-        CPU::INS_TAX,               // 2
-        CPU::INS_TYA,               // 2
-        CPU::INS_INY,               // 2
-        CPU::INS_BRK,
+        CPU::INS_LDA_ABSX, 0x15, 0x84,
     };
 
     /* Point the Reset Vector (0xFFFC/0xFFFD) to the program's start address */
     memory[0xFFFC] = 0x00;
     memory[0xFFFD] = 0x80;
 
-    /* Other memory locations */
-    memory[0x0318] = CPU::INS_LDA_IM;       // 2
-    memory[0x0319] = 0x17;
-    memory[0x031A] = CPU::INS_LDX_IM;       // 6
-    memory[0x031B] = 0x18;
-    memory[0x031C] = CPU::INS_LDY_IM;       // 6
-    memory[0x031D] = 0x19;
-    memory[0x031E] = CPU::INS_RTS;          // 6
+    /* Filling up some memory addresses */
+    memory[0x0084] = 0x15;
+    memory[0x0094] = 0x20;
+    memory[0x8415] = 0x25;
+    memory[0x8425] = 0x30;  // prev + X
+    memory[0x841A] = 0x35;  // prev + Y
 
     /* Initializing CPU */
     CPU cpu;
     cpu.Reset(2, memory);
     cpu.MountProgram(instructions, memory, instructions.size());
-    cpu.X = 0x05;
-    cpu.P = 0;
+    
+    /* Filling up registers */
+    cpu.X = 0x10;
+    cpu.Y = 0x5;
 
     /* Execution */
-    cpu.Execute(32, memory);
+    cpu.Execute(4, memory);
 
     /* Debugging */
     // memory.Debug(0x1055, 0x1065);
     cpu.Debug();
     memory.DebugPage(0);
     memory.DebugPage(0x0001);
-    memory.DebugPage(0x0002);
-    memory.DebugPage(0x0003);
+    memory.DebugPage(0x0084);
 
     return 0;
 }

@@ -24,7 +24,7 @@ uint8_t STACK_ADDRESS = 0x0100;
 uint8_t STACK_ADDRESS_END = 0x01FF;
 
 uint8_t ZERO_PAGE = 0x0100;
-uint8_t ZERO_PAGE_END = 0x0100;
+uint8_t ZERO_PAGE_END = 0x01FF;
 
 uint8_t RESET_VECTOR = 0xFFFC;
 
@@ -172,7 +172,7 @@ struct CPU
                 case INS_LDA_ZP:    /* 3 cycles */
                 {
                     uint8_t zeroPageAddress = FetchByte(cycles, memory);
-                    int8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
                     A = zeroPageValue;
 
                     LDSetStatus();
@@ -215,7 +215,7 @@ struct CPU
 
                     uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
 
-                    A = TargetAddress;
+                    A = AddressValue;
 
                     LDSetStatus();
                 } break;
@@ -231,7 +231,7 @@ struct CPU
 
                     uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
 
-                    A = TargetAddress;
+                    A = AddressValue;
 
                     LDSetStatus();
                 } break;
