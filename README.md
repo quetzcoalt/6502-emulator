@@ -50,68 +50,68 @@ I make sure to implement the instructions in all their possible memory addressin
 <table border="1" cellpadding="0" cellspacing="0" width="450">
   <tbody>
     <tr>
-      <td width="7%" height="25"><p><input type="checkbox"> ADC</p></td>
-      <td width="7%"><p><input type="checkbox"> AND</p></td>
-      <td width="7%"><p><input type="checkbox"> ASL</p></td>
-      <td width="7%"><p><input type="checkbox" checked> BCC</p></td>
-      <td width="7%"><p><input type="checkbox" checked> BCS</p></td>
-      <td width="7%"><p><input type="checkbox" checked> BEQ</p></td>
-      <td width="7%"><p><input type="checkbox"> BIT</p></td>
-      <td width="7%"><p><input type="checkbox" checked> BMI</p></td>
-      <td width="7%"><p><input type="checkbox" checked> BNE</p></td>
-      <td width="7%"><p><input type="checkbox" checked> BPL</p></td>
-      <td width="7%"><p><input type="checkbox"> BRK</p></td>
-      <td width="7%"><p><input type="checkbox" checked> BVC</p></td>
-      <td width="7%"><p><input type="checkbox" checked> BVS</p></td>
-      <td width="7%"><p><input type="checkbox"> CLC</p></td>
+      <td width="7%" height="25"><p>☐ ADC</p></td>
+      <td width="7%"><p>☐ AND</p></td>
+      <td width="7%"><p>☐ ASL</p></td>
+      <td width="7%"><p>☑ BCC</p></td>
+      <td width="7%"><p>☑ BCS</p></td>
+      <td width="7%"><p>☑ BEQ</p></td>
+      <td width="7%"><p>☐ BIT</p></td>
+      <td width="7%"><p>☑ BMI</p></td>
+      <td width="7%"><p>☑ BNE</p></td>
+      <td width="7%"><p>☑ BPL</p></td>
+      <td width="7%"><p>☐ BRK</p></td>
+      <td width="7%"><p>☑ BVC</p></td>
+      <td width="7%"><p>☑ BVS</p></td>
+      <td width="7%"><p>☐ CLC</p></td>
     </tr>
     <tr>
-      <td width="7%" height="25"><p><input type="checkbox"> CLD</p></td>
-      <td width="7%"><p><input type="checkbox"> CLI</p></td>
-      <td width="7%"><p><input type="checkbox"> CLV</p></td>
-      <td width="7%"><p><input type="checkbox" checked> CMP</p></td>
-      <td width="7%"><p><input type="checkbox" checked> CPX</p></td>
-      <td width="7%"><p><input type="checkbox" checked> CPY</p></td>
-      <td width="7%"><p><input type="checkbox"> DEC</p></td>
-      <td width="7%"><p><input type="checkbox"> DEX</p></td>
-      <td width="7%"><p><input type="checkbox"> DEY</p></td>
-      <td width="7%"><p><input type="checkbox"> EOR</p></td>
-      <td width="7%"><p><input type="checkbox" checked> INC</p></td>
-      <td width="7%"><p><input type="checkbox" checked> INX</p></td>
-      <td width="7%"><p><input type="checkbox" checked> INY</p></td>
-      <td width="7%"><p><input type="checkbox" checked> JMP</p></td>
+      <td width="7%" height="25"><p>☐ CLD</p></td>
+      <td width="7%"><p>☐ CLI</p></td>
+      <td width="7%"><p>☐ CLV</p></td>
+      <td width="7%"><p>☑ CMP</p></td>
+      <td width="7%"><p>☑ CPX</p></td>
+      <td width="7%"><p>☑ CPY</p></td>
+      <td width="7%"><p>☐ DEC</p></td>
+      <td width="7%"><p>☐ DEX</p></td>
+      <td width="7%"><p>☐ DEY</p></td>
+      <td width="7%"><p>☐ EOR</p></td>
+      <td width="7%"><p>☑ INC</p></td>
+      <td width="7%"><p>☑ INX</p></td>
+      <td width="7%"><p>☑ INY</p></td>
+      <td width="7%"><p>☑ JMP</p></td>
     </tr>
     <tr>
-      <td width="7%" height="25"><p><input type="checkbox" checked> JSR</p></td>
-      <td width="7%"><p><input type="checkbox" checked> LDA</p></td>
-      <td width="7%"><p><input type="checkbox" checked> LDX</p></td>
-      <td width="7%"><p><input type="checkbox" checked> LDY</p></td>
-      <td width="7%"><p><input type="checkbox"> LSR</p></td>
-      <td width="7%"><p><input type="checkbox" checked> NOP</p></td>
-      <td width="7%"><p><input type="checkbox"> ORA</p></td>
-      <td width="7%"><p><input type="checkbox"> PHA</p></td>
-      <td width="7%"><p><input type="checkbox"> PHP</p></td>
-      <td width="7%"><p><input type="checkbox"> PLA</p></td>
-      <td width="7%"><p><input type="checkbox"> PLP</p></td>
-      <td width="7%"><p><input type="checkbox"> ROL</p></td>
-      <td width="7%"><p><input type="checkbox"> ROR</p></td>
-      <td width="7%"><p><input type="checkbox"> RTI</p></td>
+      <td width="7%" height="25"><p>☑ JSR</p></td>
+      <td width="7%"><p>☑ LDA</p></td>
+      <td width="7%"><p>☑ LDX</p></td>
+      <td width="7%"><p>☑ LDY</p></td>
+      <td width="7%"><p>☐ LSR</p></td>
+      <td width="7%"><p>☑ NOP</p></td>
+      <td width="7%"><p>☐ ORA</p></td>
+      <td width="7%"><p>☐ PHA</p></td>
+      <td width="7%"><p>☐ PHP</p></td>
+      <td width="7%"><p>☐ PLA</p></td>
+      <td width="7%"><p>☐ PLP</p></td>
+      <td width="7%"><p>☐ ROL</p></td>
+      <td width="7%"><p>☐ ROR</p></td>
+      <td width="7%"><p>☐ RTI</p></td>
     </tr>
     <tr>
-      <td width="7%" height="25"><p><input type="checkbox" checked> RTS</p></td>
-      <td width="7%"><p><input type="checkbox"> SBC</p></td>
-      <td width="7%"><p><input type="checkbox"> SEC</p></td>
-      <td width="7%"><p><input type="checkbox"> SED</p></td>
-      <td width="7%"><p><input type="checkbox"> SEI</p></td>
-      <td width="7%"><p><input type="checkbox" checked> STA</p></td>
-      <td width="7%"><p><input type="checkbox" checked> STX</p></td>
-      <td width="7%"><p><input type="checkbox" checked> STY</p></td>
-      <td width="7%"><p><input type="checkbox"> TAX</p></td>
-      <td width="7%"><p><input type="checkbox"> TAY</p></td>
-      <td width="7%"><p><input type="checkbox"> TSX</p></td>
-      <td width="7%"><p><input type="checkbox"> TXA</p></td>
-      <td width="7%"><p><input type="checkbox"> TXS</p></td>
-      <td width="7%"><p><input type="checkbox"> TYA</p></td>
+      <td width="7%" height="25"><p>☑ RTS</p></td>
+      <td width="7%"><p>☐ SBC</p></td>
+      <td width="7%"><p>☐ SEC</p></td>
+      <td width="7%"><p>☐ SED</p></td>
+      <td width="7%"><p>☐ SEI</p></td>
+      <td width="7%"><p>☑ STA</p></td>
+      <td width="7%"><p>☑ STX</p></td>
+      <td width="7%"><p>☑ STY</p></td>
+      <td width="7%"><p>☐ TAX</p></td>
+      <td width="7%"><p>☐ TAY</p></td>
+      <td width="7%"><p>☐ TSX</p></td>
+      <td width="7%"><p>☐ TXA</p></td>
+      <td width="7%"><p>☐ TXS</p></td>
+      <td width="7%"><p>☐ TYA</p></td>
     </tr>
   </tbody>
 </table>
