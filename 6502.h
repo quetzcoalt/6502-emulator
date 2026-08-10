@@ -9,7 +9,7 @@ using namespace std;
 
 // using uint8_t = unsigned char;     // 1 uint8_t
 // using uint16_t = unsigned short;    // 2 bytes
-// using int32_t = unsigned int;       // 4 bytes
+// using uint32_t = unsigned int;       // 4 bytes
 
 #define NORMAL  "\x1B[0m"
 #define RED  "\x1B[31m"
@@ -30,22 +30,22 @@ uint8_t RESET_VECTOR = 0xFFFC;
 
 struct Memory
 {
-    static constexpr int32_t MAX_MEMORY = 1024 * 64;
+    static constexpr uint32_t MAX_MEMORY = 1024 * 64;
     static constexpr uint8_t PAGE_SIZE = 0xFF;
     uint8_t Data[MAX_MEMORY];
 
     void Initialize()
     {
-        for (int32_t i = 0; i < MAX_MEMORY; i++)
+        for (uint32_t i = 0; i < MAX_MEMORY; i++)
         {
             Data[i] = 0;
         }
     }
 
-    void Debug(int32_t start, int32_t end)
+    void Debug(uint32_t start, uint32_t end)
     {
         int counter = 0;
-        for (int32_t i = start; i < end; i++)
+        for (uint32_t i = start; i < end; i++)
         {
             printf("[0x%04X:0x%04X]  ",i, Data[i]);
             
@@ -75,9 +75,9 @@ struct Memory
 
         uint32_t PageStart = page << 8;
 
-        for (int32_t i = PageStart; i <= PageBoundary; i++)
+        for (uint32_t i = PageStart; i <= PageBoundary; i++)
         {
-            int32_t val = Data[i];
+            uint32_t val = Data[i];
             
             if (val == 0)
                 printf("%02X ", Data[i]);
@@ -89,17 +89,17 @@ struct Memory
     }
 
     /* read 1 uint8_t */
-    uint8_t operator[](int32_t address) const {
+    uint8_t operator[](uint32_t address) const {
         return Data[address];
     }
 
     /* write 1 uint8_t */
-    uint8_t& operator[](int32_t address) {
+    uint8_t& operator[](uint32_t address) {
         return Data[address];
     }
 
     /* write 2 bytes */
-    void WriteWord(uint16_t Value, int32_t address, uint32_t cycles) {
+    void WriteWord(uint16_t Value, uint32_t address, uint32_t cycles) {
         Data[address] = Value >> 8;
         Data[address - 1] = Value & 0xFF;
 
@@ -131,7 +131,7 @@ struct CPU
     */
     uint8_t P;
 
-    void Reset(int32_t cycles, Memory& memory)
+    void Reset(uint32_t cycles, Memory& memory)
     {
         uint16_t ResetVector = 0xFFFC;
         PC = ReadWord(cycles, ResetVector, memory);
@@ -141,8 +141,8 @@ struct CPU
     }
     
     /* Insert program into memory */
-    void MountProgram(vector<uint32_t> instructions, Memory& memory, int32_t cycles) {
-        int32_t StartAddress = PC;
+    void MountProgram(vector<uint32_t> instructions, Memory& memory, uint32_t cycles) {
+        uint32_t StartAddress = PC;
         
         for (uint8_t ins : instructions) {
             if (cycles > 0) {
@@ -153,8 +153,10 @@ struct CPU
         }
     }
 
-    void Execute(int32_t cycles, Memory& memory)
+    /* Return the number of cycles that were consumed */
+    uint32_t Execute(uint32_t cycles, Memory& memory)
     {
+        uint32_t TotalCycles = cycles;
         while (cycles > 0) {
             uint8_t instruction = FetchByte(cycles, memory);
             printf("Instruction being read is: %04x\n", instruction);
@@ -184,7 +186,7 @@ struct CPU
                     zeroPageAddress += X;
 
                     if (zeroPageAddress > ZERO_PAGE_END) {
-                        return;
+                        return TotalCycles - cycles;
                     }
 
                     cycles--;
@@ -292,7 +294,7 @@ struct CPU
                     zeroPageAddress += Y;
 
                     if (zeroPageAddress > ZERO_PAGE_END) {
-                        return;
+                        return TotalCycles - cycles;
                     }
 
                     cycles--;
@@ -354,7 +356,7 @@ struct CPU
                     zeroPageAddress += X;
 
                     if (zeroPageAddress > ZERO_PAGE_END) {
-                        return;
+                        return TotalCycles - cycles;
                     }
 
                     cycles--;
@@ -969,7 +971,7 @@ struct CPU
                 case INS_BRK:   /* 6 cycles */
                 {
                     printf("\e%sEOF!\e[0m\n", GREEN);
-                    return;
+                    return TotalCycles - cycles;
                 } break;
 
 
@@ -990,7 +992,8 @@ struct CPU
                 {
                     int8_t value = FetchByte(cycles, memory);
 
-                    A += value + (P & 0b00000001);
+                    A ^= value ^ (P & 0b00000001);
+                    uint8_t carry = ((S & 0b00000001) & (value & (P & 0b00000001))) | (value & (P & 0b00000001));
                 } break;
                 case INS_ADC_ZP:        /* 3 cycles */
                 {
@@ -1030,9 +1033,11 @@ struct CPU
                 } break;
             }
         }
+
+        return TotalCycles - cycles;
     }
 
-    uint8_t FetchByte(int32_t& cycles, Memory &memory) {
+    uint8_t FetchByte(uint32_t& cycles, Memory &memory) {
         uint8_t Data = memory[PC];
         PC++;
         cycles--;
@@ -1041,7 +1046,7 @@ struct CPU
     }
 
     /* Same as the previous function but doesn't increment the program counter */
-    uint8_t ReadByte(int32_t& cycles, int32_t address, Memory &memory) {
+    uint8_t ReadByte(uint32_t& cycles, uint32_t address, Memory &memory) {
         uint8_t Data = memory[address];
         printf("The uint8_t read is %04X\n", Data);
         cycles--;
@@ -1054,7 +1059,7 @@ struct CPU
     /* Also, I wanna mention that the "Word" here refers to 2 Bytes and does not refer to the CPU
        architecture which is 8-bit.
     */
-    uint16_t FetchWord(int32_t& cycles, Memory &memory) {
+    uint16_t FetchWord(uint32_t& cycles, Memory &memory) {
         /* 6502 is little endian */
         uint16_t Data = memory[PC];         /* Lower uint8_t */
         PC++;
@@ -1067,7 +1072,7 @@ struct CPU
         return Data;
     }
 
-    uint16_t ReadWord(int32_t& cycles, int32_t address, Memory &memory) {
+    uint16_t ReadWord(uint32_t& cycles, uint32_t address, Memory &memory) {
         /* 6502 is little endian */
         uint16_t Data = memory[address];            /* Lower uint8_t */
         printf("Address being read is: %04X, with value: %04X\n", address, Data);

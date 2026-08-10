@@ -38,6 +38,15 @@ public:
   }
 };
 
+TEST_F(E6502, ZeroCycles)
+{
+  constexpr uint32_t NUM_CYCLES = 0;
+
+  uint32_t cyclesUsed = cpu.Execute(NUM_CYCLES, memory);
+
+  EXPECT_EQ(cyclesUsed, 0);
+}
+
 /* -------------------- LDA -------------------- */
 TEST_F(E6502, Test_LDA_IM)
 {
@@ -48,9 +57,10 @@ TEST_F(E6502, Test_LDA_IM)
   cpu.MountProgram(instructions, memory, instructions.size());
 
   /* Execution */
-  cpu.Execute(2, memory);
+  uint32_t cycles = cpu.Execute(2, memory);
 
   EXPECT_EQ(cpu.A, 0x84);
+  EXPECT_EQ(cycles, 2);
 }
 
 TEST_F(E6502, Test_LDA_ZP)
@@ -62,9 +72,10 @@ TEST_F(E6502, Test_LDA_ZP)
   cpu.MountProgram(instructions, memory, instructions.size());
 
   /* Execution */
-  cpu.Execute(3, memory);
+  uint32_t cycles = cpu.Execute(3, memory);
 
   EXPECT_EQ(cpu.A, 0x15);
+  EXPECT_EQ(cycles, 3);
 }
 
 TEST_F(E6502, Test_LDA_ZPX)
@@ -76,9 +87,10 @@ TEST_F(E6502, Test_LDA_ZPX)
   cpu.MountProgram(instructions, memory, instructions.size());
 
   /* Execution */
-  cpu.Execute(4, memory);
+  uint32_t cycles = cpu.Execute(4, memory);
 
   EXPECT_EQ(cpu.A, 0x20);
+  EXPECT_EQ(cycles, 4);
 }
 
 TEST_F(E6502, Test_LDA_ABS)
@@ -90,9 +102,10 @@ TEST_F(E6502, Test_LDA_ABS)
   cpu.MountProgram(instructions, memory, instructions.size());
 
   /* Execution */
-  cpu.Execute(4, memory);
+  uint32_t cycles = cpu.Execute(4, memory);
 
   EXPECT_EQ(cpu.A, 0x25);
+  EXPECT_EQ(cycles, 4);
 }
 
 TEST_F(E6502, Test_LDA_ABSX)
@@ -104,9 +117,10 @@ TEST_F(E6502, Test_LDA_ABSX)
   cpu.MountProgram(instructions, memory, instructions.size());
 
   /* Execution */
-  cpu.Execute(5, memory);
+  uint32_t cycles = cpu.Execute(5, memory);
 
   EXPECT_EQ(cpu.A, 0x30);
+  EXPECT_EQ(cycles, 5);
 }
 
 TEST_F(E6502, Test_LDA_ABSY)
@@ -118,9 +132,25 @@ TEST_F(E6502, Test_LDA_ABSY)
   cpu.MountProgram(instructions, memory, instructions.size());
 
   /* Execution */
-  cpu.Execute(5, memory);
+  uint32_t cycles = cpu.Execute(5, memory);
 
   EXPECT_EQ(cpu.A, 0x35);
+  EXPECT_EQ(cycles, 5);
+}
+
+TEST_F(E6502, TEST_LDA_ZeroStatus)
+{
+  vector<uint32_t> instructions = {
+    CPU::INS_LDA_ABSY, 0x16, 0x87,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(5, memory);
+
+  EXPECT_EQ(cpu.S & 0b00000010, 0b00000010);
+  EXPECT_EQ(cycles, 5);
 }
 
 TEST_F(E6502, Test_INS_JSR)
@@ -146,7 +176,7 @@ TEST_F(E6502, Test_INS_JSR)
   cpu.MountProgram(instructions, memory, instructions.size());
 
   /* Execution */
-  cpu.Execute(32, memory);
+  uint32_t cycles = cpu.Execute(32, memory);
 
   EXPECT_EQ(cpu.A, 0x19);
 }
