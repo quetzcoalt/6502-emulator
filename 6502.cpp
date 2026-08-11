@@ -8,7 +8,10 @@ int main()
 
     /* Instructions */
     vector<uint32_t> instructions = {
-        CPU::INS_LDA_ABSX, 0x15, 0x84,
+        CPU::INS_LDA_IM, 0x80,    // 2 
+        CPU::INS_STA_ZP, 0x01,    // 3
+        CPU::INS_ADC_ZP, 0x01,    // 3
+        CPU::INS_BRK,
     };
 
     /* Point the Reset Vector (0xFFFC/0xFFFD) to the program's start address */
@@ -32,14 +35,14 @@ int main()
     cpu.Y = 0x5;
 
     /* Execution */
-    cpu.Execute(4, memory);
+    cpu.Execute(8, memory);
 
     /* Debugging */
     // memory.Debug(0x1055, 0x1065);
     cpu.Debug();
-    memory.DebugPage(0);
-    memory.DebugPage(0x0001);
-    memory.DebugPage(0x0084);
+    // memory.DebugPage(0);
+    // memory.DebugPage(0x0001);
+    // memory.DebugPage(0x0084);
 
     return 0;
 }
