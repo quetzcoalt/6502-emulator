@@ -192,6 +192,29 @@ TEST_F(E6502, TEST_ADC_1)
   EXPECT_EQ(cpu.S, 0x01ff);
 }
 
+TEST_F(E6502, TEST_BNE)
+{
+  /* Instructions */
+  vector<uint32_t> instructions = {
+      CPU::INS_LDX_IM, 0x08,        // 2
+      CPU::INS_DEX,                 // 2
+      CPU::INS_STX_ABS, 0x00, 0x02, // 4
+      CPU::INS_CPX_IM, 0x03,        // 2
+      CPU::INS_BNE, 0xf8,     // 3
+      CPU::INS_STX_ABS, 0x01, 0x02, // 4
+      CPU::INS_BRK,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(68, memory);
+
+  EXPECT_EQ(cpu.P, 0b00000011);
+  EXPECT_EQ(cpu.X, 0x03);
+  EXPECT_EQ(cycles, 62);
+}
+
 TEST_F(E6502, Test_INS_JSR)
 {
   /* Instructions */

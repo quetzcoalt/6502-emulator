@@ -387,7 +387,6 @@ struct CPU
                 case INS_STX_ABS:   /* 4 cycles */
                 {
                     uint16_t Address = FetchWord(cycles, memory);
-                
                     memory[Address] = X;
                     cycles--;
                 } break;
@@ -593,90 +592,58 @@ struct CPU
                 /* ---------- BRANCHING ---------- */
                 case INS_BNE:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
-                    uint16_t oldPC = PC;
-                    if ((P & 0b00000010) == 0) {
-                        uint8_t address = FetchByte(cycles, memory);
-                        PC += 1 + address;
-                        cycles--;
-
-                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    /* If the zero flag is clear */
+                    if (GetStatusBit(ZERO_BIT) == 0) {
+                        Branch(cycles, memory);
                     }
                 } break;
                 case INS_BEQ:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
-                    uint16_t oldPC = PC;
-                    if ((P & 0b00000010) == 0b00000010) {
-                        uint8_t address = FetchByte(cycles, memory);
-                        PC += 1 + address;
-                        cycles--;
-
-                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    /* If the zero flag is set */
+                    if (GetStatusBit(ZERO_BIT) == 1) {
+                        Branch(cycles, memory);
                     }
                 } break;
                 case INS_BPL:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
-                    uint16_t oldPC = PC;
-                    if ((P & 0b10000000) == 0) {
-                        uint8_t address = FetchByte(cycles, memory);
-                        PC += 1 + address;
-                        cycles--;
-
-                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    /* If negative flag is clear */
+                    if (GetStatusBit(NEGATIVE_BIT) == 0) {
+                        Branch(cycles, memory);
                     }
                 } break;
                 case INS_BMI:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
-                    uint16_t oldPC = PC;
-                    if ((P & 0b10000000) == 0b10000000) {
-                        uint8_t address = FetchByte(cycles, memory);
-                        PC += 1 + address;
-                        cycles--;
-
-                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    /* If negative flag is set */
+                    if (GetStatusBit(NEGATIVE_BIT) == 1) {
+                        Branch(cycles, memory);
                     }
                 } break;
                 case INS_BCC:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
-                    uint16_t oldPC = PC;
-                    if ((P & 0b00000001) == 0) {
-                        uint8_t address = FetchByte(cycles, memory);
-                        PC += 1 + address;
-                        cycles--;
-
-                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    /* If carry flag is clear */
+                    if (GetStatusBit(CARRY_BIT) == 0) {
+                        Branch(cycles, memory);
                     }
                 } break;
                 case INS_BCS:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
-                    uint16_t oldPC = PC;
-                    if ((P & 0b00000001) == 0b00000001) {
-                        uint8_t address = FetchByte(cycles, memory);
-                        PC += 1 + address;
-                        cycles--;
-
-                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    /* If carry flag is set */
+                    if (GetStatusBit(CARRY_BIT) == 1) {
+                        Branch(cycles, memory);
                     }
                 } break;
                 case INS_BVC:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
-                    uint16_t oldPC = PC;
-                    if ((P & 0b01000000) == 0) {
-                        uint8_t address = FetchByte(cycles, memory);
-                        PC += 1 + address;
-                        cycles--;
-
-                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    /* If overflow flag is clear */
+                    if (GetStatusBit(OVERFLOW_BIT) == 0) {
+                        Branch(cycles, memory);
                     }
                 } break;
                 case INS_BVS:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
-                    uint16_t oldPC = PC;
-                    if ((P & 0b01000000) == 0b01000000) {
-                        uint8_t address = FetchByte(cycles, memory);
-                        PC += 1 + address;
-                        cycles--;
-
-                        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+                    /* If overflow flag is set */
+                    if (GetStatusBit(OVERFLOW_BIT) == 1) {
+                        Branch(cycles, memory);
                     }
                 } break;
 
@@ -974,7 +941,7 @@ struct CPU
         }
     }
 
-    /* Addressing Modes Helpes */
+    /* Addressing Modes Helpers */
     uint8_t GetImmediate(uint32_t &cycles, Memory &memory)
     {
         return FetchByte(cycles, memory);
@@ -1098,6 +1065,21 @@ struct CPU
 
         A = sum;
         ArithmeticSetStatus(carry, A);
+    }
+
+    /* Branch Helpers */
+    void Branch(uint32_t &cycles, Memory &memory)
+    {
+        int8_t offset = FetchByte(cycles, memory);
+        
+        uint16_t oldPC = PC;
+
+        /* Branch taken (+1 cycle) */
+        PC += offset;
+        cycles--;
+
+        /* Page crossing (+1 cycle) */
+        if ((oldPC >> 8) != (PC >> 8)) cycles--;
     }
 
     /* Setting statuses */
@@ -1287,3 +1269,5 @@ struct CPU
         cout << "P: " << bitset<8>(P) << endl;
     }
 };
+
+
