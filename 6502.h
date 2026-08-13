@@ -1063,8 +1063,21 @@ struct CPU
                     
         uint8_t carry = sum > 0xFF;
 
+        uint8_t overflow = (((A ^ sum) & (value ^ sum) & 0b10000000) != 0);
+
         A = sum;
-        ArithmeticSetStatus(carry, A);
+
+        /* Carry flag */
+        SetStatusBit(CARRY_BIT, carry);
+
+        /* Zero Flag */
+        SetStatusBit(ZERO_BIT, A == 0);
+
+        /* Overflow flag */
+        SetStatusBit(OVERFLOW_BIT, overflow);
+
+        /* Negative flag */
+        SetStatusBit(NEGATIVE_BIT, (A & 0b10000000) > 0);
     }
 
     /* Branch Helpers */
@@ -1096,20 +1109,6 @@ struct CPU
         SetStatusBit(CARRY_BIT, difference >= 0);
         SetStatusBit(ZERO_BIT, difference == 0);
         SetStatusBit(NEGATIVE_BIT, (difference & 0b10000000) > 0);
-    }
-
-    void ArithmeticSetStatus(uint8_t carry, uint8_t sum)
-    {
-        /* Carry flag */
-        SetStatusBit(CARRY_BIT, carry);
-
-        /* Zero Flag */
-        SetStatusBit(ZERO_BIT, sum == 0);
-
-        /* Overflow flag */
-
-        /* Negative flag */
-        SetStatusBit(NEGATIVE_BIT, (sum & 0b10000000) > 0);
     }
 
     // opcodes
