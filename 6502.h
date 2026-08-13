@@ -856,6 +856,56 @@ struct CPU
 
                     ADC(value);
                 } break;
+
+                /* ---------- SBC ---------- */
+                case INS_SBC_IM:        /* 2 cycles */
+                {
+                    uint8_t value = GetImmediate(cycles, memory);
+
+                    ADC(~value);
+                } break;
+                case INS_SBC_ZP:        /* 3 cycles */
+                {
+                    uint8_t value = GetZeroPage(cycles, memory);
+
+                    ADC(~value);
+                } break;
+                case INS_SBC_ZPX:        /* 4 cycles */
+                {
+                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    
+                    ADC(~value);
+                } break;
+                case INS_SBC_ABS:       /* 4 cycles */
+                {
+                    uint8_t value = GetAbsolute(cycles, memory);
+
+                    ADC(~value);
+                } break;
+                case INS_SBC_ABSX:       /* 4 cycles (+1 if page crossed) */
+                {
+                    uint8_t value = GetAbsoluteX(cycles, memory);
+
+                    ADC(~value);
+                } break;
+                case INS_SBC_ABSY:       /* 4 cycles (+1 if page crossed) */
+                {
+                    uint8_t value = GetAbsoluteY(cycles, memory);
+
+                    ADC(~value);
+                } break;
+                case INS_SBC_IDX:       /* 6 cycles */
+                {
+                    uint8_t value = GetIndirectX(cycles, memory);
+
+                    ADC(~value);
+                } break;
+                case INS_SBC_IDY:       /* 5 (+1 if page crossed) */
+                {
+                    uint8_t value = GetIndirectY(cycles, memory);
+
+                    ADC(~value);
+                } break;
                 default:
                 {
                     /* TODO: Exception object */
@@ -1080,6 +1130,23 @@ struct CPU
         SetStatusBit(NEGATIVE_BIT, (A & 0b10000000) > 0);
     }
 
+    // void SBC(uint8_t value)
+    // {
+    //     /* The borrow is the complement of the carry flag. */
+    //     /* A - value - B
+    //        = A - value - (1 - C) + 256
+    //        = A + (255 - value) + C
+    //        = A + 1's complement of `value` + C
+    //        = A + ~(value) + C
+    //     */
+    //     uint16_t difference = A + ~(value) + (GetStatusBit(CARRY_BIT));
+
+    //     uint8_t carry = sum > 0xFF;
+
+    //     /* Subtracting a positive number from a negative number or vice versa */
+    //     uint8_t overflow = (A ^ value) &  0b10000000;
+    // }
+
     /* Branch Helpers */
     void Branch(uint32_t &cycles, Memory &memory)
     {
@@ -1261,7 +1328,17 @@ struct CPU
         INS_ADC_ABSX = 0x7D,
         INS_ADC_ABSY = 0x79,
         INS_ADC_IDX = 0x61,
-        INS_ADC_IDY = 0x71;
+        INS_ADC_IDY = 0x71,
+
+        /* SBC → Subtracts the contents of a memory location to the accumulator together with the not of the carry bit. */
+        INS_SBC_IM = 0xE9,
+        INS_SBC_ZP = 0xE5,
+        INS_SBC_ZPX = 0xF5,
+        INS_SBC_ABS = 0xED,
+        INS_SBC_ABSX = 0xFD,
+        INS_SBC_ABSY = 0xF9,
+        INS_SBC_IDX = 0xE1,
+        INS_SBC_IDY = 0xF1;
 
     void Debug() {
         printf("A: %04X\nX: %04X\nY: %04X\nPC: %08X\nS: %08X\n", A, X, Y, PC, S);

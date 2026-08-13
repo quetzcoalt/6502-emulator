@@ -42,6 +42,7 @@ Icons preceding each resource indicate the type of resource.
 - Wikipedia 6502 article;
 - ▷ [6502 CPU Emulator in C++ playlist](https://www.youtube.com/playlist?list=PLLwK93hM93Z13TRzPx9JqTIn33feefl37) - the first video game me a good start and motivated me to keep on writing code for each instruction.
 - 🌐︎ [6502 | Ultimate Commodore Reference](https://www.pagetable.com/c64ref/6502/) - Great details about the addressing modes and instructions.
+- 🌐︎ [Overflow Flag Explained - Ken Sherrif's blog](https://www.righto.com/2012/12/the-6502-overflow-flag-explained.html).
 
 ### Instructions implemented
 I make sure to implement the instructions in all their possible memory addressing modes before moving to the next one; 
