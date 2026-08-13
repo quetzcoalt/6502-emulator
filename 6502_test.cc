@@ -226,6 +226,7 @@ TEST_F(E6502, TEST_ADC_3)
   EXPECT_EQ(cpu.A, 0x60);
 }
 
+/* Subtraction with carry and overflow */
 TEST_F(E6502, TEST_SBC_0)
 {
   vector<uint32_t> instructions = {
@@ -240,7 +241,43 @@ TEST_F(E6502, TEST_SBC_0)
   uint32_t cycles = cpu.Execute(8, memory);
 
   EXPECT_EQ(cpu.P, 0b11000000);
-  EXPECT_EQ(cpu.A, 0xa0);
+  EXPECT_EQ(cpu.A, 0x9f);
+}
+
+/* Subtraction with overflow */
+TEST_F(E6502, TEST_SBC_1)
+{
+  vector<uint32_t> instructions = {
+    CPU::INS_LDA_IM, 0xd0,    // 2 
+    CPU::INS_SBC_IM, 0x70,    // 3
+    CPU::INS_BRK,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(8, memory);
+
+  EXPECT_EQ(cpu.P, 0b01000001);
+  EXPECT_EQ(cpu.A, 0x5f);
+}
+
+/* Subtraction without flags changing */
+TEST_F(E6502, TEST_SBC_2)
+{
+  vector<uint32_t> instructions = {
+    CPU::INS_LDA_IM, 0x50,    // 2 
+    CPU::INS_SBC_IM, 0xf0,    // 3
+    CPU::INS_BRK,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(8, memory);
+
+  EXPECT_EQ(cpu.P, 0b00000000);
+  EXPECT_EQ(cpu.A, 0x5f);
 }
 
 TEST_F(E6502, TEST_BNE)
