@@ -262,7 +262,7 @@ TEST_F(E6502, TEST_SBC_1)
   EXPECT_EQ(cpu.A, 0x5f);
 }
 
-/* Subtraction without flags changing */
+/* Subtraction with overflow */
 TEST_F(E6502, TEST_SBC_2)
 {
   vector<uint32_t> instructions = {
@@ -280,6 +280,7 @@ TEST_F(E6502, TEST_SBC_2)
   EXPECT_EQ(cpu.A, 0x5f);
 }
 
+/* BRANCHES AND JUMPS */
 TEST_F(E6502, TEST_BNE)
 {
   /* Instructions */
@@ -329,4 +330,44 @@ TEST_F(E6502, Test_INS_JSR)
   uint32_t cycles = cpu.Execute(32, memory);
 
   EXPECT_EQ(cpu.A, 0x19);
+}
+
+/* ---------- PSR OPERATIONS ---------- */
+TEST_F(E6502, Test_CLC_CLV_CLD)
+{
+  cpu.P = 0b11111111;
+
+  /* Instructions */
+  vector<uint32_t> instructions = {
+      CPU::INS_CLC,
+      CPU::INS_CLV,
+      CPU::INS_CLD,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(6, memory);
+
+  EXPECT_EQ(cpu.P, 0b10110110);
+  EXPECT_EQ(cycles, 6);
+}
+
+TEST_F(E6502, Test_SEC_SED)
+{
+  cpu.P = 0;
+
+  /* Instructions */
+  vector<uint32_t> instructions = {
+      CPU::INS_SEC,
+      CPU::INS_SED,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(4, memory);
+
+  EXPECT_EQ(cpu.P, 0b00001001);
+  EXPECT_EQ(cycles, 4);
 }

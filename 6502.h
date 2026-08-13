@@ -906,6 +906,40 @@ struct CPU
 
                     ADC(~value);
                 } break;
+
+
+
+
+                /* ---------- PSR OPERATIONS ---------- */
+                case INS_CLC:
+                {
+                    SetStatusBit(CARRY_BIT, 0);
+                    cycles--;
+                } break;
+                case INS_SEC:
+                {
+                    SetStatusBit(CARRY_BIT, 1);
+                    cycles--;
+                } break;
+                case INS_CLV:
+                {
+                    SetStatusBit(OVERFLOW_BIT, 0);
+                    cycles--;
+                } break;
+                case INS_SED:
+                {
+                    SetStatusBit(DECIMAL_BIT, 1);
+                    cycles--;
+                } break;
+                case INS_CLD:
+                {
+                    SetStatusBit(DECIMAL_BIT, 0);
+                    cycles--;
+                } break;
+
+
+
+
                 default:
                 {
                     /* TODO: Exception object */
@@ -1338,7 +1372,23 @@ struct CPU
         INS_SBC_ABSX = 0xFD,
         INS_SBC_ABSY = 0xF9,
         INS_SBC_IDX = 0xE1,
-        INS_SBC_IDY = 0xF1;
+        INS_SBC_IDY = 0xF1,
+
+        /* ===== PSR OPERATIONS ===== */
+        /* CLC → Clears the carry flag. */
+        INS_CLC = 0x18,
+
+        /* CLC → Sets the carry flag. */
+        INS_SEC = 0x38,
+
+        /* CLV → Clears the overflow flag. */
+        INS_CLV = 0xB8,
+
+        /* SED → Sets the decimal mode flag. */
+        INS_SED = 0xF8,
+
+        /* CLD → Clears the decimal mode flag. */
+        INS_CLD = 0xD8;
 
     void Debug() {
         printf("A: %04X\nX: %04X\nY: %04X\nPC: %08X\nS: %08X\n", A, X, Y, PC, S);

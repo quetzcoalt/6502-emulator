@@ -46,7 +46,7 @@ Icons preceding each resource indicate the type of resource.
 
 ### Instructions implemented
 I make sure to implement the instructions in all their possible memory addressing modes before moving to the next one; 
-- Currenlty, I have implemented <span style="color:khaki; font-weight:500">20</span> out if 56 instruction.
+- Currenlty, I have implemented <span style="color:khaki; font-weight:500">31</span> out if 56 instruction.
 
 <table border="1" cellpadding="0" cellspacing="0" width="450">
   <tbody>
@@ -64,12 +64,12 @@ I make sure to implement the instructions in all their possible memory addressin
       <td width="7%"><p>☐ BRK</p></td>
       <td width="7%"><p>☑ BVC</p></td>
       <td width="7%"><p>☑ BVS</p></td>
-      <td width="7%"><p>☐ CLC</p></td>
+      <td width="7%"><p>☑ CLC</p></td>
     </tr>
     <tr>
-      <td width="7%" height="25"><p>☐ CLD</p></td>
+      <td width="7%" height="25"><p>☑ CLD</p></td>
       <td width="7%"><p>☐ CLI</p></td>
-      <td width="7%"><p>☐ CLV</p></td>
+      <td width="7%"><p>☑ CLV</p></td>
       <td width="7%"><p>☑ CMP</p></td>
       <td width="7%"><p>☑ CPX</p></td>
       <td width="7%"><p>☑ CPY</p></td>
@@ -100,9 +100,9 @@ I make sure to implement the instructions in all their possible memory addressin
     </tr>
     <tr>
       <td width="7%" height="25"><p>☑ RTS</p></td>
-      <td width="7%"><p>☐ SBC</p></td>
-      <td width="7%"><p>☐ SEC</p></td>
-      <td width="7%"><p>☐ SED</p></td>
+      <td width="7%"><p>☑ SBC</p></td>
+      <td width="7%"><p>☑ SEC</p></td>
+      <td width="7%"><p>☑ SED</p></td>
       <td width="7%"><p>☐ SEI</p></td>
       <td width="7%"><p>☑ STA</p></td>
       <td width="7%"><p>☑ STX</p></td>
