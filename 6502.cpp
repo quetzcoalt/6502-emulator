@@ -8,9 +8,9 @@ int main()
 
     /* Instructions */
     vector<uint32_t> instructions = {
-        CPU::INS_LDA_IM, 0x80,    // 2 
-        CPU::INS_STA_ZP, 0x01,    // 3
-        CPU::INS_ADC_ZP, 0x01,    // 3
+        CPU::INS_SED,             // 2
+        CPU::INS_LDA_IM, 0x5e,    // 2 
+        CPU::INS_ADC_IM, 0xe6,    // 3
         CPU::INS_BRK,
     };
 

@@ -226,12 +226,51 @@ TEST_F(E6502, TEST_ADC_3)
   EXPECT_EQ(cpu.A, 0x60);
 }
 
+/* ADC with decimal mode on */
+TEST_F(E6502, TEST_ADC_BCD_0)
+{
+  vector<uint32_t> instructions = {
+    CPU::INS_SED,             // 2
+    CPU::INS_LDA_IM, 0x09,    // 2 
+    CPU::INS_ADC_IM, 0x01,    // 3
+    CPU::INS_BRK,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(7, memory);
+
+  EXPECT_EQ(cpu.P, 0b00001000);
+  EXPECT_EQ(cpu.A, 0x0a);
+}
+
+/* ADC with decimal mode on */
+TEST_F(E6502, TEST_ADC_BCD_1)
+{
+  vector<uint32_t> instructions = {
+    CPU::INS_SED,             // 2
+    CPU::INS_LDA_IM, 0x5e,    // 2 
+    CPU::INS_ADC_IM, 0xe6,    // 3
+    CPU::INS_BRK,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(7, memory);
+
+  EXPECT_EQ(cpu.P, 0b11001000);
+  EXPECT_EQ(cpu.A, 0x93);
+}
+
+
 /* Subtraction with carry and overflow */
 TEST_F(E6502, TEST_SBC_0)
 {
   vector<uint32_t> instructions = {
-    CPU::INS_LDA_IM, 0x50,    // 2 
-    CPU::INS_SBC_IM, 0xb0,    // 3
+    CPU::INS_LDA_IM, 0x5e,    // 2 
+    CPU::INS_SBC_IM, 0xe6,    // 3
     CPU::INS_BRK,
   };
 
@@ -240,8 +279,8 @@ TEST_F(E6502, TEST_SBC_0)
   /* Execution */
   uint32_t cycles = cpu.Execute(8, memory);
 
-  EXPECT_EQ(cpu.P, 0b11000000);
-  EXPECT_EQ(cpu.A, 0x9f);
+  EXPECT_EQ(cpu.P, 0b11001000);
+  EXPECT_EQ(cpu.A, 0x93);
 }
 
 /* Subtraction with overflow */

@@ -46,13 +46,13 @@ Icons preceding each resource indicate the type of resource.
 
 ### Instructions implemented
 I make sure to implement the instructions in all their possible memory addressing modes before moving to the next one; 
-- Currenlty, I have implemented <span style="color:khaki; font-weight:500">31</span> out if 56 instruction.
+- Currenlty, I have implemented <span style="color:khaki; font-weight:500">34</span> out if 56 instruction.
 
 <table border="1" cellpadding="0" cellspacing="0" width="450">
   <tbody>
     <tr>
       <td width="7%" height="25"><p>☑ ADC</p></td>
-      <td width="7%"><p>☐ AND</p></td>
+      <td width="7%"><p>☑ AND</p></td>
       <td width="7%"><p>☐ ASL</p></td>
       <td width="7%"><p>☑ BCC</p></td>
       <td width="7%"><p>☑ BCS</p></td>
@@ -76,7 +76,7 @@ I make sure to implement the instructions in all their possible memory addressin
       <td width="7%"><p>☐ DEC</p></td>
       <td width="7%"><p>☐ DEX</p></td>
       <td width="7%"><p>☐ DEY</p></td>
-      <td width="7%"><p>☐ EOR</p></td>
+      <td width="7%"><p>☑ EOR</p></td>
       <td width="7%"><p>☑ INC</p></td>
       <td width="7%"><p>☑ INX</p></td>
       <td width="7%"><p>☑ INY</p></td>
@@ -89,7 +89,7 @@ I make sure to implement the instructions in all their possible memory addressin
       <td width="7%"><p>☑ LDY</p></td>
       <td width="7%"><p>☐ LSR</p></td>
       <td width="7%"><p>☑ NOP</p></td>
-      <td width="7%"><p>☐ ORA</p></td>
+      <td width="7%"><p>☑ ORA</p></td>
       <td width="7%"><p>☐ PHA</p></td>
       <td width="7%"><p>☐ PHP</p></td>
       <td width="7%"><p>☐ PLA</p></td>
@@ -122,7 +122,12 @@ I make sure to implement the instructions in all their possible memory addressin
 - [ ] Taking care of overflows and underflows.
 
 ## To run tests
+First:
+```bash
+cmake -S . -B build
+```
 
+And then, just keep doing:
 ```bash
 cmake --build build
 cd build && ctest

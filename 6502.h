@@ -940,6 +940,162 @@ struct CPU
 
 
 
+                /* ---------- LOGICAL OPERATIONS ---------- */
+                /* AND */
+                case INS_AND_IM:        /* 2 cycles */
+                {
+                    uint8_t value = GetImmediate(cycles, memory);
+
+                    AND(value);
+                } break;
+                case INS_AND_ZP:        /* 3 cycles */
+                {
+                    uint8_t value = GetZeroPage(cycles, memory);
+
+                    AND(value);
+                } break;
+                case INS_AND_ZPX:        /* 4 cycles */
+                {
+                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    
+                    AND(value);
+                } break;
+                case INS_AND_ABS:       /* 4 cycles */
+                {
+                    uint8_t value = GetAbsolute(cycles, memory);
+
+                    AND(value);
+                } break;
+                case INS_AND_ABSX:       /* 4 cycles (+1 if page crossed) */
+                {
+                    uint8_t value = GetAbsoluteX(cycles, memory);
+
+                    AND(value);
+                } break;
+                case INS_AND_ABSY:       /* 4 cycles (+1 if page crossed) */
+                {
+                    uint8_t value = GetAbsoluteY(cycles, memory);
+
+                    AND(value);
+                } break;
+                case INS_AND_IDX:       /* 6 cycles */
+                {
+                    uint8_t value = GetIndirectX(cycles, memory);
+
+                    AND(value);
+                } break;
+                case INS_AND_IDY:       /* 5 (+1 if page crossed) */
+                {
+                    uint8_t value = GetIndirectY(cycles, memory);
+
+                    AND(value);
+                } break;
+
+                
+                /* ORA */
+                case INS_ORA_IM:        /* 2 cycles */
+                {
+                    uint8_t value = GetImmediate(cycles, memory);
+
+                    ORA(value);
+                } break;
+                case INS_ORA_ZP:        /* 3 cycles */
+                {
+                    uint8_t value = GetZeroPage(cycles, memory);
+
+                    ORA(value);
+                } break;
+                case INS_ORA_ZPX:        /* 4 cycles */
+                {
+                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    
+                    ORA(value);
+                } break;
+                case INS_ORA_ABS:       /* 4 cycles */
+                {
+                    uint8_t value = GetAbsolute(cycles, memory);
+
+                    ORA(value);
+                } break;
+                case INS_ORA_ABSX:       /* 4 cycles (+1 if page crossed) */
+                {
+                    uint8_t value = GetAbsoluteX(cycles, memory);
+
+                    ORA(value);
+                } break;
+                case INS_ORA_ABSY:       /* 4 cycles (+1 if page crossed) */
+                {
+                    uint8_t value = GetAbsoluteY(cycles, memory);
+
+                    ORA(value);
+                } break;
+                case INS_ORA_IDX:       /* 6 cycles */
+                {
+                    uint8_t value = GetIndirectX(cycles, memory);
+
+                    ORA(value);
+                } break;
+                case INS_ORA_IDY:       /* 5 (+1 if page crossed) */
+                {
+                    uint8_t value = GetIndirectY(cycles, memory);
+
+                    ORA(value);
+                } break;
+
+                
+                /* EOR */
+                case INS_EOR_IM:        /* 2 cycles */
+                {
+                    uint8_t value = GetImmediate(cycles, memory);
+
+                    EOR(value);
+                } break;
+                case INS_EOR_ZP:        /* 3 cycles */
+                {
+                    uint8_t value = GetZeroPage(cycles, memory);
+
+                    EOR(value);
+                } break;
+                case INS_EOR_ZPX:        /* 4 cycles */
+                {
+                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    
+                    EOR(value);
+                } break;
+                case INS_EOR_ABS:       /* 4 cycles */
+                {
+                    uint8_t value = GetAbsolute(cycles, memory);
+
+                    EOR(value);
+                } break;
+                case INS_EOR_ABSX:       /* 4 cycles (+1 if page crossed) */
+                {
+                    uint8_t value = GetAbsoluteX(cycles, memory);
+
+                    EOR(value);
+                } break;
+                case INS_EOR_ABSY:       /* 4 cycles (+1 if page crossed) */
+                {
+                    uint8_t value = GetAbsoluteY(cycles, memory);
+
+                    EOR(value);
+                } break;
+                case INS_EOR_IDX:       /* 6 cycles */
+                {
+                    uint8_t value = GetIndirectX(cycles, memory);
+
+                    EOR(value);
+                } break;
+                case INS_EOR_IDY:       /* 5 (+1 if page crossed) */
+                {
+                    uint8_t value = GetIndirectY(cycles, memory);
+
+                    EOR(value);
+                } break;
+
+
+
+
                 default:
                 {
                     /* TODO: Exception object */
@@ -1143,7 +1299,16 @@ struct CPU
     /* Repetitive Operations */
     void ADC(uint8_t value)
     {
-        uint16_t sum = A + value + GetStatusBit(CARRY_BIT);
+        uint16_t sum;
+        uint8_t carry_bit = GetStatusBit(CARRY_BIT);
+
+        if (GetStatusBit(DECIMAL_BIT))
+        {
+            sum = BCD(BCD(A, value), carry_bit);
+        } else
+        {
+            sum = A + value + carry_bit;
+        }
                     
         uint8_t carry = sum > 0xFF;
 
@@ -1164,22 +1329,42 @@ struct CPU
         SetStatusBit(NEGATIVE_BIT, (A & 0b10000000) > 0);
     }
 
-    // void SBC(uint8_t value)
-    // {
-    //     /* The borrow is the complement of the carry flag. */
-    //     /* A - value - B
-    //        = A - value - (1 - C) + 256
-    //        = A + (255 - value) + C
-    //        = A + 1's complement of `value` + C
-    //        = A + ~(value) + C
-    //     */
-    //     uint16_t difference = A + ~(value) + (GetStatusBit(CARRY_BIT));
+    void AND(uint8_t value)
+    {
+        A &= value;
 
-    //     uint8_t carry = sum > 0xFF;
+        LogicalSetStatus(A);
+    }
 
-    //     /* Subtracting a positive number from a negative number or vice versa */
-    //     uint8_t overflow = (A ^ value) &  0b10000000;
-    // }
+    void ORA(uint8_t value)
+    {
+        A |= value;
+
+        LogicalSetStatus(A);
+    }
+
+    void EOR(uint8_t value)
+    {
+        A ^= value;
+
+        LogicalSetStatus(A);
+    }
+
+
+    // TODO: make this function better, it doesn't cover all cases.
+    uint8_t BCD(uint8_t x, uint8_t y)
+    {
+        uint8_t first = (0b00001111 & x) + (0b00001111 & y);
+        uint8_t second = (0b11110000 & x) + (0b11110000 & y);
+
+        if (first > 0x09) first += 6;
+        
+        if (second > 0x09) second += 6;
+
+        printf("BCD addition: %04x\n", ((second >> 4) * 10) + first);
+
+        return ((second >> 4) * 10) + first;
+    }
 
     /* Branch Helpers */
     void Branch(uint32_t &cycles, Memory &memory)
@@ -1210,6 +1395,13 @@ struct CPU
         SetStatusBit(CARRY_BIT, difference >= 0);
         SetStatusBit(ZERO_BIT, difference == 0);
         SetStatusBit(NEGATIVE_BIT, (difference & 0b10000000) > 0);
+    }
+
+    void LogicalSetStatus(uint8_t result)
+    {
+        SetStatusBit(ZERO_BIT, result == 0);
+
+        SetStatusBit(NEGATIVE_BIT, (result & 0b10000000) >> 7);
     }
 
     // opcodes
@@ -1388,7 +1580,38 @@ struct CPU
         INS_SED = 0xF8,
 
         /* CLD → Clears the decimal mode flag. */
-        INS_CLD = 0xD8;
+        INS_CLD = 0xD8,
+
+        /* ===== LOGICAL OPERATIONS ===== */
+        /* AND */
+        INS_AND_IM = 0x29,
+        INS_AND_ZP = 0x25,
+        INS_AND_ZPX = 0x35,
+        INS_AND_ABS = 0x2D,
+        INS_AND_ABSX = 0x3D,
+        INS_AND_ABSY = 0x39,
+        INS_AND_IDX = 0x21,
+        INS_AND_IDY = 0x31,
+
+        /* ORA -> OR */
+        INS_ORA_IM = 0x09,
+        INS_ORA_ZP = 0x05,
+        INS_ORA_ZPX = 0x15,
+        INS_ORA_ABS = 0x0D,
+        INS_ORA_ABSX = 0x1D,
+        INS_ORA_ABSY = 0x19,
+        INS_ORA_IDX = 0x01,
+        INS_ORA_IDY = 0x11,
+
+        /* EOR -> XOR */
+        INS_EOR_IM = 0x49,
+        INS_EOR_ZP = 0x45,
+        INS_EOR_ZPX = 0x55,
+        INS_EOR_ABS = 0x4D,
+        INS_EOR_ABSX = 0x5D,
+        INS_EOR_ABSY = 0x59,
+        INS_EOR_IDX = 0x41,
+        INS_EOR_IDY = 0x51;
 
     void Debug() {
         printf("A: %04X\nX: %04X\nY: %04X\nPC: %08X\nS: %08X\n", A, X, Y, PC, S);
