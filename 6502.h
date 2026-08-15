@@ -1096,6 +1096,136 @@ struct CPU
 
 
 
+                /* ---------- ROTATION AND SHIFT OPERATIONS ---------- */
+                /* ASL */
+                case INS_ASL_A:        /* 2 cycles */
+                {
+
+                    ASL(A);
+                } break;
+                case INS_ASL_ZP:        /* 5 cycles */
+                {
+                    uint8_t value = GetZeroPage(cycles, memory);
+
+                    ASL(value);
+                } break;
+                case INS_ASL_ZPX:        /* 6 cycles */
+                {
+                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    
+                    ASL(value);
+                } break;
+                case INS_ASL_ABS:       /* 6 cycles */
+                {
+                    uint8_t value = GetAbsolute(cycles, memory);
+
+                    ASL(value);
+                } break;
+                case INS_ASL_ABSX:       /* 7 cycles */
+                {
+                    uint8_t value = GetAbsoluteX(cycles, memory);
+
+                    ASL(value);
+                } break;
+
+                /* LSR */
+                case INS_LSR_A:        /* 2 cycles */
+                {
+                    uint8_t value = GetImmediate(cycles, memory);
+
+                    LSR(value);
+                } break;
+                case INS_LSR_ZP:        /* 5 cycles */
+                {
+                    uint8_t value = GetZeroPage(cycles, memory);
+
+                    LSR(value);
+                } break;
+                case INS_LSR_ZPX:        /* 6 cycles */
+                {
+                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    
+                    LSR(value);
+                } break;
+                case INS_LSR_ABS:       /* 6 cycles */
+                {
+                    uint8_t value = GetAbsolute(cycles, memory);
+
+                    LSR(value);
+                } break;
+                case INS_LSR_ABSX:       /* 7 cycles */
+                {
+                    uint8_t value = GetAbsoluteX(cycles, memory);
+
+                    LSR(value);
+                } break;
+
+                /* ROL */
+                case INS_ROL_A:        /* 2 cycles */
+                {
+                    uint8_t value = GetImmediate(cycles, memory);
+
+                    ROL(value);
+                } break;
+                case INS_ROL_ZP:        /* 5 cycles */
+                {
+                    uint8_t value = GetZeroPage(cycles, memory);
+
+                    ROL(value);
+                } break;
+                case INS_ROL_ZPX:        /* 6 cycles */
+                {
+                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    
+                    ROL(value);
+                } break;
+                case INS_ROL_ABS:       /* 6 cycles */
+                {
+                    uint8_t value = GetAbsolute(cycles, memory);
+
+                    ROL(value);
+                } break;
+                case INS_ROL_ABSX:       /* 7 cycles */
+                {
+                    uint8_t value = GetAbsoluteX(cycles, memory);
+
+                    ROL(value);
+                } break;
+
+                /* ROR */
+                case INS_ROR_A:        /* 2 cycles */
+                {
+                    uint8_t value = GetImmediate(cycles, memory);
+
+                    ROR(value);
+                } break;
+                case INS_ROR_ZP:        /* 5 cycles */
+                {
+                    uint8_t value = GetZeroPage(cycles, memory);
+
+                    ROR(value);
+                } break;
+                case INS_ROR_ZPX:        /* 6 cycles */
+                {
+                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    
+                    ROR(value);
+                } break;
+                case INS_ROR_ABS:       /* 6 cycles */
+                {
+                    uint8_t value = GetAbsolute(cycles, memory);
+
+                    ROR(value);
+                } break;
+                case INS_ROR_ABSX:       /* 7 cycles */
+                {
+                    uint8_t value = GetAbsoluteX(cycles, memory);
+
+                    ROR(value);
+                } break;
+
+
+
                 default:
                 {
                     /* TODO: Exception object */
@@ -1350,6 +1480,32 @@ struct CPU
         LogicalSetStatus(A);
     }
 
+    void ASL(uint8_t value)
+    {
+        A = (value << 1);
+
+        ASLSetStatus(value, A);
+    }
+
+    void LSR(uint8_t value)
+    {
+        A = (value >> 1);
+
+        LeftSetStatus(value, A);
+    }
+
+    void ROL(uint8_t value)
+    {
+        A = (value << 1);
+
+        RightSetStatus(value, A);
+    }
+
+    void ROR(uint8_t value)
+    {
+
+    }
+
 
     // TODO: make this function better, it doesn't cover all cases.
     uint8_t BCD(uint8_t x, uint8_t y)
@@ -1397,11 +1553,36 @@ struct CPU
         SetStatusBit(NEGATIVE_BIT, (difference & 0b10000000) > 0);
     }
 
-    void LogicalSetStatus(uint8_t result)
+    void LogicalSetStatus(uint8_t value)
     {
-        SetStatusBit(ZERO_BIT, result == 0);
+        SetStatusBit(ZERO_BIT, value == 0);
 
-        SetStatusBit(NEGATIVE_BIT, (result & 0b10000000) >> 7);
+        /* Set if bit 7 of the result is set */
+        SetStatusBit(NEGATIVE_BIT, (value & 0b10000000) >> 7);
+    }
+
+    /* Shift and rotate left statuses */
+    void LeftSetStatus(uint8_t oldValue, uint8_t value)
+    {
+        /* Set to contents of old bit 7 */
+        SetStatusBit(CARRY_BIT, oldValue & 0b10000000);
+
+        SetStatusBit(ZERO_BIT, value == 0);
+
+        /* Set if bit 7 of the result is set */
+        SetStatusBit(NEGATIVE_BIT, (value & 0b10000000) >> 7);
+    }
+
+    /* Shift and rotate left statuses */
+    void RightSetStatus(uint8_t oldValue, uint8_t value)
+    {
+        /* Set to contents of old bit 7 */
+        SetStatusBit(CARRY_BIT, oldValue & 1);
+
+        SetStatusBit(ZERO_BIT, value == 0);
+
+        /* Set if bit 7 of the result is set */
+        SetStatusBit(NEGATIVE_BIT, (value & 0b10000000) >> 7);
     }
 
     // opcodes
@@ -1611,7 +1792,36 @@ struct CPU
         INS_EOR_ABSX = 0x5D,
         INS_EOR_ABSY = 0x59,
         INS_EOR_IDX = 0x41,
-        INS_EOR_IDY = 0x51;
+        INS_EOR_IDY = 0x51,
+
+        /* ===== ROTATE AND SHIFT OPERATIONS ===== */
+        /* ASL -> Arithmetic Shift Left */
+        INS_ASL_A = 0x0A,
+        INS_ASL_ZP = 0x06,
+        INS_ASL_ZPX = 0x16,
+        INS_ASL_ABS = 0x0E,
+        INS_ASL_ABSX = 0x1E,
+
+        /* LSR -> Logical Shift Right */
+        INS_LSR_A = 0x4A,
+        INS_LSR_ZP = 0x46,
+        INS_LSR_ZPX = 0x56,
+        INS_LSR_ABS = 0x4E,
+        INS_LSR_ABSX = 0x5E,
+
+        /* ROL -> Arithmetic Shift Left */
+        INS_ROL_A = 0x2A,
+        INS_ROL_ZP = 026,
+        INS_ROL_ZPX = 0x36,
+        INS_ROL_ABS = 0x2E,
+        INS_ROL_ABSX = 0x3E,
+
+        /* ROR -> Arithmetic Shift Left */
+        INS_ROR_A = 0x6A,
+        INS_ROR_ZP = 0x66,
+        INS_ROR_ZPX = 0x76,
+        INS_ROR_ABS = 0x6E,
+        INS_ROR_ABSX = 0x7E;
 
     void Debug() {
         printf("A: %04X\nX: %04X\nY: %04X\nPC: %08X\nS: %08X\n", A, X, Y, PC, S);
