@@ -1496,14 +1496,20 @@ struct CPU
 
     void ROL(uint8_t value)
     {
-        A = (value << 1);
+        int8_t lastBit = (value & 0x80) >> 7;
+
+        A = (value << 1) | lastBit;
 
         RightSetStatus(value, A);
     }
 
     void ROR(uint8_t value)
     {
+        uint8_t firstBit = value & 1;
 
+        A = (value >> 1) | (firstBit << 7);
+
+        RightSetStatus(value, A);
     }
 
 

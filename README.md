@@ -46,7 +46,7 @@ Icons preceding each resource indicate the type of resource.
 
 ### Instructions implemented
 I make sure to implement the instructions in all their possible memory addressing modes before moving to the next one; 
-- Currenlty, I have implemented <span style="color:khaki; font-weight:500">36</span> out if 56 instruction.
+- Currenlty, I have implemented <span style="color:khaki; font-weight:500">38</span> out if 56 instruction.
 
 <table border="1" cellpadding="0" cellspacing="0" width="450">
   <tbody>
@@ -94,8 +94,8 @@ I make sure to implement the instructions in all their possible memory addressin
       <td width="7%"><p>☐ PHP</p></td>
       <td width="7%"><p>☐ PLA</p></td>
       <td width="7%"><p>☐ PLP</p></td>
-      <td width="7%"><p>☐ ROL</p></td>
-      <td width="7%"><p>☐ ROR</p></td>
+      <td width="7%"><p>☑ ROL</p></td>
+      <td width="7%"><p>☑ ROR</p></td>
       <td width="7%"><p>☐ RTI</p></td>
     </tr>
     <tr>
