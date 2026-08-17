@@ -1226,6 +1226,61 @@ struct CPU
 
 
 
+
+                /* ---------- STACK OPERATIONS ---------- */
+                case INS_TXS:   /* 2 cycles */
+                {
+                    memory[S] = X;
+                    cycles--;
+
+                    S--;
+                } break;
+                case INS_TSX:   /* 2 cycles */
+                {
+                    X = memory[S];
+                    cycles;
+
+                    S++;
+                    
+                    SetStatusBit(ZERO_BIT, X == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (X & 0x80) >> 7);
+                } break;
+                case INS_PHA:   /* 3 cycles */
+                {
+                    memory[S] = A;
+                    cycles--;
+
+                    S--;
+                    cycles--;
+                } break;
+                case INS_PLA:   /* 4 cycles */
+                {
+                    A = memory[S];
+                    cycles -= 2;
+
+                    S++;
+                    cycles--;
+                } break;
+                case INS_PHP:
+                {
+                    memory[S] = P;
+                    cycles--;
+
+                    S--;
+                    cycles--;
+                } break;
+                case INS_PLP:   /* 4 cycles */
+                {
+                    P = memory[S];
+                    cycles -= 2;
+
+                    S++;
+                    cycles--;
+                } break;
+
+
+
                 default:
                 {
                     /* TODO: Exception object */
@@ -1827,7 +1882,27 @@ struct CPU
         INS_ROR_ZP = 0x66,
         INS_ROR_ZPX = 0x76,
         INS_ROR_ABS = 0x6E,
-        INS_ROR_ABSX = 0x7E;
+        INS_ROR_ABSX = 0x7E,
+
+
+        /* ===== STACK OPERATIONS ===== */
+        /* TXS -> Copies the current contents of the X register into the stack register. */
+        INS_TXS = 0x9A,
+
+        /* TSX -> Copies the current contents of the stack register into the X register, and sets Z and N flags. */
+        INS_TSX = 0xBA,
+
+        /* PHA -> Pushes a copy of the accumulator on to the stack. */
+        INS_PHA = 0x48,
+
+        /* PLA -> Pulls an 8 bit value from the stack and into the accumulator. */
+        INS_PLA = 0x68,
+        
+        /* PHP -> Pushes a copy of the status flags on to the stack. */
+        INS_PHP = 0x08,
+
+        /* PLP -> Pulls an 8 bit value from the stack and into the processor flags. */
+        INS_PLP = 0x28;
 
     void Debug() {
         printf("A: %04X\nX: %04X\nY: %04X\nPC: %08X\nS: %08X\n", A, X, Y, PC, S);
