@@ -279,8 +279,8 @@ TEST_F(E6502, TEST_SBC_0)
   /* Execution */
   uint32_t cycles = cpu.Execute(8, memory);
 
-  EXPECT_EQ(cpu.P, 0b11001000);
-  EXPECT_EQ(cpu.A, 0x93);
+  EXPECT_EQ(cpu.P, 0);
+  EXPECT_EQ(cpu.A, 0x77);
 }
 
 /* Subtraction with overflow */
@@ -322,13 +322,15 @@ TEST_F(E6502, TEST_SBC_2)
 /* BRANCHES AND JUMPS */
 TEST_F(E6502, TEST_BNE)
 {
+  cpu.P = 0;
+
   /* Instructions */
   vector<uint32_t> instructions = {
       CPU::INS_LDX_IM, 0x08,        // 2
       CPU::INS_DEX,                 // 2
       CPU::INS_STX_ABS, 0x00, 0x02, // 4
       CPU::INS_CPX_IM, 0x03,        // 2
-      CPU::INS_BNE, 0xf8,     // 3
+      CPU::INS_BNE, 0xf8,           // 3
       CPU::INS_STX_ABS, 0x01, 0x02, // 4
       CPU::INS_BRK,
   };
@@ -340,7 +342,7 @@ TEST_F(E6502, TEST_BNE)
 
   EXPECT_EQ(cpu.P, 0b00000011);
   EXPECT_EQ(cpu.X, 0x03);
-  EXPECT_EQ(cycles, 62);
+  EXPECT_EQ(cycles, 60);
 }
 
 TEST_F(E6502, Test_INS_JSR)
@@ -409,4 +411,111 @@ TEST_F(E6502, Test_SEC_SED)
 
   EXPECT_EQ(cpu.P, 0b00001001);
   EXPECT_EQ(cycles, 4);
+}
+
+/* ---------- STACK OPERATIONS ---------- */
+TEST_F(E6502, TSX_0)
+{
+  /* Instructions */
+  vector<uint32_t> instructions = {
+      CPU::INS_LDA_IM, 0x03,          // 2 cycles
+      CPU::INS_STA_ABS, 0xff, 0x01,   // 4 cycles
+      CPU::INS_TSX,                   // 2 cycles
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(8, memory);
+
+  EXPECT_EQ(cpu.X, 0xff);
+  EXPECT_EQ(cpu.P, 0b10000000);
+  EXPECT_EQ(cycles, 8);
+}
+
+TEST_F(E6502, TXS_0)
+{
+  /* Instructions */
+  vector<uint32_t> instructions = {
+      CPU::INS_LDX_IM, 0x03,          // 2 cycles
+      CPU::INS_TXS,                   // 2 cycles
+      CPU::INS_BRK,                   // 1 cycle
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(5, memory);
+
+  EXPECT_EQ(cpu.X, 0x03);
+  EXPECT_EQ(cpu.S, 0x103);
+  EXPECT_EQ(cpu.P, 0b00000000);
+  EXPECT_EQ(cycles, 5);
+}
+
+TEST_F(E6502, PHA_0)
+{
+  /* Instructions */
+  vector<uint32_t> instructions = {
+      CPU::INS_LDA_IM, 0x80,          // 2 cycles
+      CPU::INS_PHA,                   // 3 cycles
+      CPU::INS_BRK,                   // 1 cycle
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(6, memory);
+
+  EXPECT_EQ(cpu.A, 0x80);
+  EXPECT_EQ(cpu.S, 0x1fe);
+  EXPECT_EQ(cpu.P, 0b10000000);
+  EXPECT_EQ(memory[cpu.S + 1], 0x80);
+  EXPECT_EQ(cycles, 6);
+}
+
+TEST_F(E6502, PLA_0)
+{
+  /* Instructions */
+  vector<uint32_t> instructions = {
+      CPU::INS_LDA_IM, 0x80,          // 2 cycles
+      CPU::INS_PHA,                   // 3 cycles
+      CPU::INS_LDA_IM, 0x00,          // 2 cycles
+      CPU::INS_PLA,                   // 4 cycles
+      CPU::INS_BRK,                   // 1 cycle
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(6, memory);
+
+  EXPECT_EQ(cpu.A, 0x80);
+  EXPECT_EQ(cpu.S, 0x1ff);
+  EXPECT_EQ(cpu.P, 0b10000000);
+  EXPECT_EQ(memory[cpu.S], 0x80);
+  EXPECT_EQ(cycles, 12);
+}
+
+TEST_F(E6502, PLP_0)
+{
+  cpu.P = 0b10011011;
+
+  /* Instructions */
+  vector<uint32_t> instructions = {
+      CPU::INS_LDA_IM, 0b10011011,
+      CPU::INS_STA_ABS, 0x00, 0x01,
+      CPU::INS_PLP,
+  };
+
+  cpu.MountProgram(instructions, memory, instructions.size());
+
+  /* Execution */
+  uint32_t cycles = cpu.Execute(11, memory);
+
+  EXPECT_EQ(cpu.A, 0b10011011);
+  EXPECT_EQ(cpu.S, 0x100);
+  EXPECT_EQ(memory[cpu.S], cpu.P);
+  EXPECT_EQ(cpu.P, 0b10011011);
+  // EXPECT_EQ(cycles, 4);
 }

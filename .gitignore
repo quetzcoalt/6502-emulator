@@ -3,3 +3,4 @@
 proc.cpp
 build
 .vscode
+__cmake_systeminformation

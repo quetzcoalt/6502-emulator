@@ -107,8 +107,15 @@ struct Memory
         return Data[address];
     }
 
+    /* write 1 byte */
+    void WriteByte(uint8_t Value, uint32_t address, uint32_t &cycles) {
+        Data[address] = Value;
+
+        cycles--;
+    }
+    
     /* write 2 bytes */
-    void WriteWord(uint16_t Value, uint32_t address, uint32_t cycles) {
+    void WriteWord(uint16_t Value, uint32_t address, uint32_t &cycles) {
         Data[address] = Value >> 8;
         Data[address - 1] = Value & 0xFF;
 
@@ -177,49 +184,51 @@ struct CPU
                 {
                     A = GetImmediate(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(A);
+
+                    cout << "Status after LDA is: " << bitset<8>(P) << endl;
                 } break;
                 case INS_LDA_ZP:    /* 3 cycles */
                 {
                     A = GetZeroPage(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
                 case INS_LDA_ZPX:   /* 4 cycles */
                 {
                     A = GetZeroPageX(cycles, memory, TotalCycles);
                     
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
                 case INS_LDA_ABS:   /* 4 cycles */
                 {
                     A = GetAbsolute(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
                 case INS_LDA_ABSX:  /* 4 cycles (+1 if page crossed) */
                 {
                     A = GetAbsoluteX(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
                 case INS_LDA_ABSY:  /* 4 cycles (+1 if page crossed) */
                 {
                     A = GetAbsoluteY(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
                 case INS_LDA_IDX:  /* 6 cycles */
                 {
                     A = GetIndirectX(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
                 case INS_LDA_IDY:  /* 5 cycles (+1 if page crossed) */
                 {
                     A = GetIndirectY(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
 
 
@@ -228,32 +237,32 @@ struct CPU
                 /* -------------------- LDX -------------------- */
                 case INS_LDX_IM:    /* 2 cycles */
                 {
-                    X = GetImmediate(cycles, memory);;
+                    X = GetImmediate(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(X);
                 } break;
                 case INS_LDX_ZP:    /* 3 cycles */
                 {
                     X = GetZeroPage(cycles, memory);;
 
-                    LDSetStatus();
+                    LDSetStatus(X);
                 } break;
                 case INS_LDX_ZPY:   /* 4 cycles */
                 {
                     X = GetZeroPageY(cycles, memory, TotalCycles);
                     
-                    LDSetStatus();
+                    LDSetStatus(X);
                 } break;
                 case INS_LDX_ABS:   /* 4 cycles */
                 {
                     X = GetAbsolute(cycles, memory);
-                    LDSetStatus();
+                    LDSetStatus(X);
                 } break;
                 case INS_LDX_ABSY:  /* 4 cycles (+1 if page crossed) */
                 {
                     X = GetAbsoluteY(cycles, memory);;
 
-                    LDSetStatus();
+                    LDSetStatus(X);
                 } break;
 
 
@@ -264,30 +273,30 @@ struct CPU
                 {
                     Y = GetImmediate(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(Y);
                 } break;
                 case INS_LDY_ZP:    /* 3 cycles */
                 {
                     Y = GetZeroPage(cycles, memory);
 
-                    LDSetStatus();
+                    LDSetStatus(Y);
                 } break;
                 case INS_LDY_ZPX:   /* 4 cycles */
                 {
                     Y = GetZeroPageX(cycles, memory, TotalCycles);
                     
-                    LDSetStatus();
+                    LDSetStatus(Y);
                 } break;
                 case INS_LDY_ABS:   /* 4 cycles */
                 {
                     Y = GetAbsolute(cycles, memory);
-                    LDSetStatus();
+                    LDSetStatus(Y);
                 } break;
                 case INS_LDY_ABSX:  /* 4 cycles (+1 if page crossed) */
                 {
                     Y = GetAbsoluteX(cycles, memory);;
 
-                    LDSetStatus();
+                    LDSetStatus(Y);
                 } break;
 
 
@@ -427,25 +436,25 @@ struct CPU
                 {
                     X = A;
                     cycles--;
-                    LDSetStatus();
+                    LDSetStatus(X);
                 } break;
                 case INS_TAY:       /* 2 cycles */
                 {
                     Y = A;
                     cycles--;
-                    LDSetStatus();
+                    LDSetStatus(Y);
                 } break;
                 case INS_TXA:       /* 2 cycles */
                 {
                     A = X;
                     cycles--;
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
                 case INS_TYA:       /* 2 cycles */
                 {
                     A = Y;
                     cycles--;
-                    LDSetStatus();
+                    LDSetStatus(A);
                 } break;
 
 
@@ -456,25 +465,25 @@ struct CPU
                 {
                     X--;
                     cycles--;
-                    LDSetStatus();
+                    LDSetStatus(X);
                 } break;
                 case INS_DEY:       /* 2 cycles */
                 {
                     Y--;
                     cycles--;
-                    LDSetStatus();
+                    LDSetStatus(Y);
                 } break;
                 case INS_INX:       /* 2 cycles */
                 {
                     X++;
                     cycles--;
-                    LDSetStatus();
+                    LDSetStatus(X);
                 } break;
                 case INS_INY:       /* 2 cycles */
                 {
                     Y++;
                     cycles--;
-                    LDSetStatus();
+                    LDSetStatus(Y);
                 } break;
 
 
@@ -595,6 +604,8 @@ struct CPU
                     /* If the zero flag is clear */
                     if (GetStatusBit(ZERO_BIT) == 0) {
                         Branch(cycles, memory);
+                    } else {
+                        PC++;
                     }
                 } break;
                 case INS_BEQ:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
@@ -602,6 +613,8 @@ struct CPU
                     /* If the zero flag is set */
                     if (GetStatusBit(ZERO_BIT) == 1) {
                         Branch(cycles, memory);
+                    } else {
+                        PC++;
                     }
                 } break;
                 case INS_BPL:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
@@ -609,6 +622,8 @@ struct CPU
                     /* If negative flag is clear */
                     if (GetStatusBit(NEGATIVE_BIT) == 0) {
                         Branch(cycles, memory);
+                    } else {
+                        PC++;
                     }
                 } break;
                 case INS_BMI:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
@@ -616,6 +631,8 @@ struct CPU
                     /* If negative flag is set */
                     if (GetStatusBit(NEGATIVE_BIT) == 1) {
                         Branch(cycles, memory);
+                    } else {
+                        PC++;
                     }
                 } break;
                 case INS_BCC:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
@@ -623,6 +640,8 @@ struct CPU
                     /* If carry flag is clear */
                     if (GetStatusBit(CARRY_BIT) == 0) {
                         Branch(cycles, memory);
+                    } else {
+                        PC++;
                     }
                 } break;
                 case INS_BCS:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
@@ -630,6 +649,8 @@ struct CPU
                     /* If carry flag is set */
                     if (GetStatusBit(CARRY_BIT) == 1) {
                         Branch(cycles, memory);
+                    } else {
+                        PC++;
                     }
                 } break;
                 case INS_BVC:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
@@ -637,6 +658,8 @@ struct CPU
                     /* If overflow flag is clear */
                     if (GetStatusBit(OVERFLOW_BIT) == 0) {
                         Branch(cycles, memory);
+                    } else {
+                        PC++;
                     }
                 } break;
                 case INS_BVS:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
@@ -644,6 +667,8 @@ struct CPU
                     /* If overflow flag is set */
                     if (GetStatusBit(OVERFLOW_BIT) == 1) {
                         Branch(cycles, memory);
+                    } else {
+                        PC++;
                     }
                 } break;
 
@@ -777,10 +802,30 @@ struct CPU
                     uint16_t ReturnAddress = ReadWord(cycles, S + 1, memory);
                     
                     S += 2;
-                    cycles -= 2; // idk, not sure if the 2 cycles left are decremented here
+                    cycles--; // +1 cycle to increment the stack pointer
 
                     PC = ReturnAddress;
-                    cycles--;   
+                    cycles--;
+
+                    // 1-byte instructions consume an extra cycle.
+                    cycles--;
+                } break;
+
+                /* RTI */
+                case INS_RTI:       /* 6 cycles */
+                {
+                    uint8_t flag = ReadByte(cycles, S + 1, memory);
+
+                    uint16_t ReturnAddress = ReadWord(cycles, S + 2, memory);
+
+                    S += 3;
+                    cycles--; // +1 cycle to increment the stack pointer
+
+                    PC = ReturnAddress;
+                    P = flag;
+
+                    // 1-byte instructions consume an extra cycle.
+                    cycles--;
                 } break;
 
 
@@ -791,6 +836,7 @@ struct CPU
                 case INS_BRK:   /* 6 cycles */
                 {
                     printf("\e%sEOF!\e[0m\n", GREEN);
+
                     return TotalCycles - cycles;
                 } break;
 
@@ -911,31 +957,41 @@ struct CPU
 
 
                 /* ---------- PSR OPERATIONS ---------- */
-                case INS_CLC:
+                case INS_CLC:   /* 2 cycles */
                 {
                     SetStatusBit(CARRY_BIT, 0);
                     cycles--;
                 } break;
-                case INS_SEC:
+                case INS_SEC:   /* 2 cycles */
                 {
                     SetStatusBit(CARRY_BIT, 1);
                     cycles--;
                 } break;
-                case INS_CLV:
+                case INS_CLV:   /* 2 cycles */
                 {
                     SetStatusBit(OVERFLOW_BIT, 0);
                     cycles--;
                 } break;
-                case INS_SED:
+                case INS_SED:   /* 2 cycles */
                 {
                     SetStatusBit(DECIMAL_BIT, 1);
                     cycles--;
                 } break;
-                case INS_CLD:
+                case INS_CLD:   /* 2 cycles */
                 {
                     SetStatusBit(DECIMAL_BIT, 0);
                     cycles--;
                 } break;
+                case INS_CLI:   /* 2 cycles */
+                {
+                    SetStatusBit(INTERRUPT_DISABLE_BIT, 0);
+                    cycles--;
+                }
+                case INS_SEI:   /* 2 cycles */
+                {
+                    SetStatusBit(INTERRUPT_DISABLE_BIT, 1);
+                    cycles--;
+                }
 
 
 
@@ -1167,7 +1223,7 @@ struct CPU
 
                     ROL(value);
                 } break;
-                case INS_ROL_ZP:        /* 5 cycles */
+            case INS_ROL_ZP:        /* 5 cycles */
                 {
                     uint8_t value = GetZeroPage(cycles, memory);
 
@@ -1230,52 +1286,64 @@ struct CPU
                 /* ---------- STACK OPERATIONS ---------- */
                 case INS_TXS:   /* 2 cycles */
                 {
-                    memory[S] = X;
+                    S &= (X | 0x100);
                     cycles--;
-
-                    S--;
                 } break;
                 case INS_TSX:   /* 2 cycles */
                 {
-                    X = memory[S];
-                    cycles;
-
-                    S++;
+                    X = S;
                     
                     SetStatusBit(ZERO_BIT, X == 0);
 
                     SetStatusBit(NEGATIVE_BIT, (X & 0x80) >> 7);
+
+                    // 1-byte instructions consume an extra cycle.
+                    cycles--;
                 } break;
                 case INS_PHA:   /* 3 cycles */
                 {
                     memory[S] = A;
                     cycles--;
 
-                    S--;
+                    S = (uint16_t) 0x100 | ((uint8_t) (S - 1));
+                    
+                    // 1-byte instructions consume an extra cycle.
                     cycles--;
                 } break;
                 case INS_PLA:   /* 4 cycles */
                 {
-                    A = memory[S];
-                    cycles -= 2;
+                    S = (uint16_t) 0x100 | ((uint8_t) (S + 1));
+                    cycles--;
 
-                    S++;
+                    A = memory[S];
+                    cycles--;
+
+                    SetStatusBit(ZERO_BIT, A == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (A & 0x80) >> 7);
+
+                    // 1-byte instructions consume an extra cycle.
                     cycles--;
                 } break;
-                case INS_PHP:
+                case INS_PHP:   /* 3 cycles */
                 {
                     memory[S] = P;
                     cycles--;
 
-                    S--;
+                    S = (uint16_t) 0x100 | ((uint8_t) (S - 1));
+                    
+                    // 1-byte instructions consume an extra cycle.
                     cycles--;
                 } break;
                 case INS_PLP:   /* 4 cycles */
                 {
-                    P = memory[S];
-                    cycles -= 2;
+                    S = (uint16_t) 0x100 | ((uint8_t) (S + 1));
+                    cycles--;
 
-                    S++;
+                    P = memory[S];
+                    cycles--;
+
+                    // 1-byte instructions consume an extra cycle.
                     cycles--;
                 } break;
 
@@ -1291,6 +1359,8 @@ struct CPU
                 } break;
             }
         }
+
+        printf("Total cycles are %d, cycles left are %d\n", TotalCycles, cycles);
 
         return TotalCycles - cycles;
     }
@@ -1334,7 +1404,6 @@ struct CPU
         /* 6502 is little endian */
         uint16_t Data = memory[address];            /* Lower uint8_t */
         printf("Address being read is: %04X, with value: %04X\n", address, Data);
-
 
         Data |= (memory[address + 1] << 8);     /* Higher uint8_t */
         printf("Address being read is: %04X, with value: %04X\n", address + 1, Data);
@@ -1539,7 +1608,7 @@ struct CPU
     {
         A = (value << 1);
 
-        ASLSetStatus(value, A);
+        LeftSetStatus(value, A);
     }
 
     void LSR(uint8_t value)
@@ -1599,12 +1668,11 @@ struct CPU
     }
 
     /* Setting statuses */
-    void LDSetStatus()
+    void LDSetStatus(uint8_t reg)
     {
-        SetStatusBit(ZERO_BIT, A == 0);
-        // P |= ((A == 0) << 5);
+        SetStatusBit(ZERO_BIT, reg == 0);
 
-        SetStatusBit(NEGATIVE_BIT, (A & 0b10000000) > 0);
+        SetStatusBit(NEGATIVE_BIT, (reg & 0b10000000) > 0);
     }
 
     void CMPSetStatus(uint8_t difference)
@@ -1779,6 +1847,9 @@ struct CPU
         /* RTS → Pulls the program counter (minus one) from the stack. */
         INS_RTS = 0x60,
 
+        /* RTI → Pulls the processor flags from the stack followed by the program counter. */
+        INS_RTI = 0x40,
+
         /* ===== BREAK ===== */
         /* Unfinished */
         INS_BRK = 0x00,
@@ -1823,6 +1894,12 @@ struct CPU
 
         /* CLD → Clears the decimal mode flag. */
         INS_CLD = 0xD8,
+
+        /* CLI → Clears the interrupt disable flag. */
+        INS_CLI = 0x58,
+
+        /* SEI → Sets the interrupt disable flag. */
+        INS_SEI = 0x78,
 
         /* ===== LOGICAL OPERATIONS ===== */
         /* AND */
@@ -1872,7 +1949,7 @@ struct CPU
 
         /* ROL -> Arithmetic Shift Left */
         INS_ROL_A = 0x2A,
-        INS_ROL_ZP = 026,
+        INS_ROL_ZP = 0x26,
         INS_ROL_ZPX = 0x36,
         INS_ROL_ABS = 0x2E,
         INS_ROL_ABSX = 0x3E,
@@ -1905,7 +1982,7 @@ struct CPU
         INS_PLP = 0x28;
 
     void Debug() {
-        printf("A: %04X\nX: %04X\nY: %04X\nPC: %08X\nS: %08X\n", A, X, Y, PC, S);
+        printf("A: %02X\nX: %02X\nY: %02X\nPC: %04X\nS: %04X\n", A, X, Y, PC, S);
         cout << "P: " << bitset<8>(P) << endl;
     }
 };

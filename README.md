@@ -46,7 +46,7 @@ Icons preceding each resource indicate the type of resource.
 
 ### Instructions implemented
 I make sure to implement the instructions in all their possible memory addressing modes before moving to the next one; 
-- Currenlty, I have implemented <span style="color:khaki; font-weight:500">38</span> out if 56 instruction.
+- Currenlty, I have implemented <span style="color:khaki; font-weight:500">54</span> out if 56 instruction.
 
 <table border="1" cellpadding="0" cellspacing="0" width="450">
   <tbody>
@@ -68,14 +68,14 @@ I make sure to implement the instructions in all their possible memory addressin
     </tr>
     <tr>
       <td width="7%" height="25"><p>☑ CLD</p></td>
-      <td width="7%"><p>☐ CLI</p></td>
+      <td width="7%"><p>☑ CLI</p></td>
       <td width="7%"><p>☑ CLV</p></td>
       <td width="7%"><p>☑ CMP</p></td>
       <td width="7%"><p>☑ CPX</p></td>
       <td width="7%"><p>☑ CPY</p></td>
-      <td width="7%"><p>☐ DEC</p></td>
-      <td width="7%"><p>☐ DEX</p></td>
-      <td width="7%"><p>☐ DEY</p></td>
+      <td width="7%"><p>☑ DEC</p></td>
+      <td width="7%"><p>☑ DEX</p></td>
+      <td width="7%"><p>☑ DEY</p></td>
       <td width="7%"><p>☑ EOR</p></td>
       <td width="7%"><p>☑ INC</p></td>
       <td width="7%"><p>☑ INX</p></td>
@@ -90,29 +90,29 @@ I make sure to implement the instructions in all their possible memory addressin
       <td width="7%"><p>☑ LSR</p></td>
       <td width="7%"><p>☑ NOP</p></td>
       <td width="7%"><p>☑ ORA</p></td>
-      <td width="7%"><p>☐ PHA</p></td>
-      <td width="7%"><p>☐ PHP</p></td>
-      <td width="7%"><p>☐ PLA</p></td>
-      <td width="7%"><p>☐ PLP</p></td>
+      <td width="7%"><p>☑ PHA</p></td>
+      <td width="7%"><p>☑ PHP</p></td>
+      <td width="7%"><p>☑ PLA</p></td>
+      <td width="7%"><p>☑ PLP</p></td>
       <td width="7%"><p>☑ ROL</p></td>
       <td width="7%"><p>☑ ROR</p></td>
-      <td width="7%"><p>☐ RTI</p></td>
+      <td width="7%"><p>☑ RTI</p></td>
     </tr>
     <tr>
       <td width="7%" height="25"><p>☑ RTS</p></td>
       <td width="7%"><p>☑ SBC</p></td>
       <td width="7%"><p>☑ SEC</p></td>
       <td width="7%"><p>☑ SED</p></td>
-      <td width="7%"><p>☐ SEI</p></td>
+      <td width="7%"><p>☑ SEI</p></td>
       <td width="7%"><p>☑ STA</p></td>
       <td width="7%"><p>☑ STX</p></td>
       <td width="7%"><p>☑ STY</p></td>
-      <td width="7%"><p>☐ TAX</p></td>
-      <td width="7%"><p>☐ TAY</p></td>
-      <td width="7%"><p>☐ TSX</p></td>
-      <td width="7%"><p>☐ TXA</p></td>
-      <td width="7%"><p>☐ TXS</p></td>
-      <td width="7%"><p>☐ TYA</p></td>
+      <td width="7%"><p>☑ TAX</p></td>
+      <td width="7%"><p>☑ TAY</p></td>
+      <td width="7%"><p>☑ TSX</p></td>
+      <td width="7%"><p>☑ TXA</p></td>
+      <td width="7%"><p>☑ TXS</p></td>
+      <td width="7%"><p>☑ TYA</p></td>
     </tr>
   </tbody>
 </table>
