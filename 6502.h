@@ -853,6 +853,25 @@ struct CPU
 
 
 
+                /* ---------- BIT ---------- */
+                case INS_BIT_ZP:   /* 3 cycles */
+                {
+                    A &= GetZeroPage(cycles, memory);
+
+                    SetStatusBit(NEGATIVE_BIT, (A & 0x80) >> 7);
+
+                    SetStatusBit(OVERFLOW_BIT, (A & 0x40) >> 6);
+                } break;
+                case INS_BIT_ABS:   /* 4 cycles */
+                {
+                    A &= GetAbsolute(cycles, memory);
+
+                    SetStatusBit(NEGATIVE_BIT, (A & 0x80) >> 7);
+
+                    SetStatusBit(OVERFLOW_BIT, (A & 0x40) >> 6);
+                } break;
+
+
                 /* ---------- ADC ---------- */
                 case INS_ADC_IM:        /* 2 cycles */
                 {
@@ -1979,7 +1998,12 @@ struct CPU
         INS_PHP = 0x08,
 
         /* PLP -> Pulls an 8 bit value from the stack and into the processor flags. */
-        INS_PLP = 0x28;
+        INS_PLP = 0x28,
+
+
+        /* ===== Bit Test ===== */
+        INS_BIT_ZP = 0x24,
+        INS_BIT_ABS = 0x2C;
 
     void Debug() {
         printf("A: %02X\nX: %02X\nY: %02X\nPC: %04X\nS: %04X\n", A, X, Y, PC, S);
