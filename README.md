@@ -46,7 +46,7 @@ Icons preceding each resource indicate the type of resource.
 
 ### Instructions implemented
 I make sure to implement the instructions in all their possible memory addressing modes before moving to the next one; 
-- Currenlty, I have implemented <span style="color:khaki; font-weight:500">54</span> out if 56 instruction.
+- Currenlty, I have implemented <span style="color:khaki; font-weight:500">56</span> out if 56 instruction.
 
 <table border="1" cellpadding="0" cellspacing="0" width="450">
   <tbody>
@@ -57,11 +57,11 @@ I make sure to implement the instructions in all their possible memory addressin
       <td width="7%"><p>☑ BCC</p></td>
       <td width="7%"><p>☑ BCS</p></td>
       <td width="7%"><p>☑ BEQ</p></td>
-      <td width="7%"><p>☐ BIT</p></td>
+      <td width="7%"><p>☑ BIT</p></td>
       <td width="7%"><p>☑ BMI</p></td>
       <td width="7%"><p>☑ BNE</p></td>
       <td width="7%"><p>☑ BPL</p></td>
-      <td width="7%"><p>☐ BRK</p></td>
+      <td width="7%"><p>☑ BRK</p></td>
       <td width="7%"><p>☑ BVC</p></td>
       <td width="7%"><p>☑ BVS</p></td>
       <td width="7%"><p>☑ CLC</p></td>

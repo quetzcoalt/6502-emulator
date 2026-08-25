@@ -832,11 +832,28 @@ struct CPU
 
 
                 /* ---------- BREAK ---------- */
-                /* Unfinished, supposed to consume 6 cycles */
-                case INS_BRK:   /* 6 cycles */
-                {
+                /* The BRK instruction forces the generation of an interrupt request. */
+                case INS_BRK:   /* 7 cycles */
+                {   
+                    /* The program counter and processor status are pushed on the stack */
+                    memory.WriteWord(PC, S, cycles);
+                    S -= 2;
+
+                    memory[S] = flag;
+                    S--;
+                    cycles--;           // 4
+
+                    /* The content of the interrupt vector at $FFFE/F is loaded into the PC */ 
+                    uint16_t interrupt_content = ReadWord(cycles, 0xFFFE, memory); // 6
+                    PC = interrupt_content;
+                    
+                    /* The break flag in the status set to one. */
+                    SetStatusBit(BREAK_BIT, 1);
+
                     printf("\e%sEOF!\e[0m\n", GREEN);
 
+                    /* Cycle for the 1-byte instruction penaltyf */
+                    cycles--;       // 7
                     return TotalCycles - cycles;
                 } break;
 
