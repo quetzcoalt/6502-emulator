@@ -135,3 +135,22 @@ cd build && ctest
 
 ## Tests I have completed so far. 
 - LDA, with all its addressing modes ☑
+- LDX, with all its addressing modes ☑
+- LDY, with all its addressing modes ☑
+
+- STA, with all its addressing modes ☑
+- STX, with all its addressing modes ☑
+- STY, with all its addressing modes ☑
+
+- TAX ☑
+- TAY ☑
+- TXA ☑
+- TYA ☑
+
+- DEX ☑
+- DEY ☑
+- INX ☑
+- INY ☑
+- DEC, with all its addressing modes ☑
+- INC, with all its addressing modes ☑
+

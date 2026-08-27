@@ -344,10 +344,10 @@ struct CPU
                     memory[Address] = A;
                     cycles--;
                 } break;
-                case INS_STA_IDX:
+                case INS_STA_IDX:      /* 6 cycles */
                 {
                     // STA ($40,X)
-                    uint8_t Address = FetchWord(cycles, memory);
+                    uint8_t Address = FetchByte(cycles, memory);
 
                     Address += X;
                     cycles--;
@@ -355,18 +355,19 @@ struct CPU
                     uint16_t AddressValue = ReadWord(cycles, Address, memory);
 
                     memory[AddressValue] = A;
+                    cycles--;
                 } break;
-                case INS_STA_IDY:
+                case INS_STA_IDY:      /* 6 cycles */
                 {
                     // STA ($40),Y
-                    uint8_t Address = FetchWord(cycles, memory);
+                    uint8_t Address = FetchByte(cycles, memory);
                     uint16_t AddressValue = ReadWord(cycles, Address, memory);
 
-                    AddressValue += Y;
+                    uint16_t TargetAddress = AddressValue + Y;
                     cycles--;
 
-                    uint16_t FinalValue = ReadWord(cycles, AddressValue, memory);
-                    A = FinalValue;
+                    uint8_t FinalValue =  memory[TargetAddress];
+                    cycles--;
 
                     memory[AddressValue] = A;
                 } break;
@@ -497,6 +498,10 @@ struct CPU
                     
                     memory[Address] = Value;
                     cycles--;
+
+                    SetStatusBit(ZERO_BIT, Value == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (Value & 0x80) >> 7);
                 } break;
                 case INS_DEC_ZPX:       /* 6 cycles */
                 {
@@ -511,6 +516,10 @@ struct CPU
                     
                     memory[Address] = Value;
                     cycles--;
+
+                    SetStatusBit(ZERO_BIT, Value == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (Value & 0x80) >> 7);
                 } break;
                 case INS_DEC_ABS:       /* 6 cycles */
                 {
@@ -523,6 +532,10 @@ struct CPU
                     
                     memory[Address] = Value;
                     cycles--;
+
+                    SetStatusBit(ZERO_BIT, Value == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (Value & 0x80) >> 7);
                 } break;
                 case INS_DEC_ABSX:      /* 7 cycles */
                 {
@@ -537,6 +550,10 @@ struct CPU
                     
                     memory[Address] = Value;
                     cycles--;
+
+                    SetStatusBit(ZERO_BIT, Value == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (Value & 0x80) >> 7);
                 } break;
 
                 case INS_INC_ZP:        /* 5 cycles */
@@ -550,6 +567,10 @@ struct CPU
                     
                     memory[Address] = Value;
                     cycles--;
+
+                    SetStatusBit(ZERO_BIT, Value == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (Value & 0x80) >> 7);
                 } break;
                 case INS_INC_ZPX:       /* 6 cycles */
                 {
@@ -564,6 +585,10 @@ struct CPU
                     
                     memory[Address] = Value;
                     cycles--;
+
+                    SetStatusBit(ZERO_BIT, Value == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (Value & 0x80) >> 7);
                 } break;
                 case INS_INC_ABS:       /* 6 cycles */
                 {
@@ -576,6 +601,10 @@ struct CPU
                     
                     memory[Address] = Value;
                     cycles--;
+
+                    SetStatusBit(ZERO_BIT, Value == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (Value & 0x80) >> 7);
                 } break;
                 case INS_INC_ABSX:      /* 7 cycles */
                 {
@@ -590,6 +619,10 @@ struct CPU
                     
                     memory[Address] = Value;
                     cycles--;
+
+                    SetStatusBit(ZERO_BIT, Value == 0);
+
+                    SetStatusBit(NEGATIVE_BIT, (Value & 0x80) >> 7);
                 } break;
 
 
