@@ -7,3 +7,4 @@ __cmake_systeminformation
 tests
 libs
 CMakeCache.txt
+CMakeFiles
