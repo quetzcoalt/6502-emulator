@@ -20,13 +20,13 @@ using namespace std;
 #define CYAN  "\x1B[36m"
 #define WHITE  "\x1B[37m"
 
-uint8_t STACK_ADDRESS = 0x0100;
-uint8_t STACK_ADDRESS_END = 0x01FF;
+uint16_t STACK_ADDRESS = 0x0100;
+uint16_t STACK_ADDRESS_END = 0x01FF;
 
-uint8_t ZERO_PAGE = 0x0100;
-uint8_t ZERO_PAGE_END = 0x01FF;
+uint16_t ZERO_PAGE = 0x0100;
+uint16_t ZERO_PAGE_END = 0x01FF;
 
-uint8_t RESET_VECTOR = 0xFFFC;
+uint16_t RESET_VECTOR = 0xFFFC;
 
 /* Status bits positions */
 #define CARRY_BIT 0
@@ -175,7 +175,6 @@ struct CPU
         uint32_t TotalCycles = cycles;
         while (cycles > 0) {
             uint8_t instruction = FetchByte(cycles, memory);
-            printf("Instruction being read is: %04x\n", instruction);
             
             switch (instruction)
             {
@@ -185,8 +184,6 @@ struct CPU
                     A = GetImmediate(cycles, memory);
 
                     LDSetStatus(A);
-
-                    cout << "Status after LDA is: " << bitset<8>(P) << endl;
                 } break;
                 case INS_LDA_ZP:    /* 3 cycles */
                 {
@@ -836,12 +833,11 @@ struct CPU
                 case INS_BRK:   /* 7 cycles */
                 {   
                     /* The program counter and processor status are pushed on the stack */
-                    memory.WriteWord(PC, S, cycles);
+                    memory.WriteWord(PC, S, cycles);    // 3
                     S -= 2;
 
-                    memory[S] = flag;
+                    memory.WriteByte(P, S, cycles);     // 4
                     S--;
-                    cycles--;           // 4
 
                     /* The content of the interrupt vector at $FFFE/F is loaded into the PC */ 
                     uint16_t interrupt_content = ReadWord(cycles, 0xFFFE, memory); // 6
@@ -1388,7 +1384,7 @@ struct CPU
                 default:
                 {
                     /* TODO: Exception object */
-                    printf("Instruction not handled %d", instruction);
+                    printf("Instruction not handled %02x\n", instruction);
 
                     
                     cycles--;
@@ -1406,13 +1402,14 @@ struct CPU
         PC++;
         cycles--;
 
+        printf("Program counter is: %d\n", PC);
+
         return Data;
     }
 
     /* Same as the previous function but doesn't increment the program counter */
     uint8_t ReadByte(uint32_t& cycles, uint32_t address, Memory &memory) {
         uint8_t Data = memory[address];
-        printf("The uint8_t read is %04X\n", Data);
         cycles--;
 
         return Data;
@@ -1439,10 +1436,8 @@ struct CPU
     uint16_t ReadWord(uint32_t& cycles, uint32_t address, Memory &memory) {
         /* 6502 is little endian */
         uint16_t Data = memory[address];            /* Lower uint8_t */
-        printf("Address being read is: %04X, with value: %04X\n", address, Data);
 
         Data |= (memory[address + 1] << 8);     /* Higher uint8_t */
-        printf("Address being read is: %04X, with value: %04X\n", address + 1, Data);
 
         cycles -= 2;
 
@@ -1532,7 +1527,7 @@ struct CPU
         uint16_t Address = FetchWord(cycles, memory);
         uint16_t TargetAddress = Address + X;
 
-        if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+        if ((Address & 0xFF00) != (TargetAddress & 0xFF00))
         {
             cycles--;
         }
@@ -1547,7 +1542,7 @@ struct CPU
         uint16_t Address = FetchWord(cycles, memory);
         uint16_t TargetAddress = Address + Y;
 
-        if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+        if ((Address & 0xFF00) != (TargetAddress & 0xFF00))
         {
             cycles--;
         }
@@ -1565,25 +1560,31 @@ struct CPU
         Address += X;
         cycles--;
 
-        uint8_t AddressValue = ReadByte(cycles, Address, memory);
+        uint16_t AddressValue = ReadWord(cycles, Address, memory);
+        
+        uint8_t value = memory[AddressValue];
+        cycles--;
 
-        return AddressValue;
+        return value;
     }
 
     uint8_t GetIndirectY(uint32_t &cycles, Memory &memory)
     {
         // OPCODE ($40),Y
         uint8_t Address = FetchByte(cycles, memory);
-        uint8_t AddressValue = ReadWord(cycles, Address, memory);
+        uint16_t AddressValue = ReadWord(cycles, Address, memory);
 
         uint16_t TargetAddress = AddressValue + Y;
 
-        if ((Address && 0xFF00) != (TargetAddress && 0xFF00))
+        if ((AddressValue & 0xFF00) != (TargetAddress & 0xFF00))
         {
             cycles--;
         }
 
-        return AddressValue;
+        uint8_t value = memory[TargetAddress];
+        cycles--;
+
+        return value;
     }
 
     /* Repetitive Operations */
@@ -1887,7 +1888,6 @@ struct CPU
         INS_RTI = 0x40,
 
         /* ===== BREAK ===== */
-        /* Unfinished */
         INS_BRK = 0x00,
 
         /* ===== NOP ===== */

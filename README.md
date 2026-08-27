@@ -124,7 +124,7 @@ I make sure to implement the instructions in all their possible memory addressin
 ## To run tests
 First:
 ```bash
-cmake -S . -B build
+cmake -S . -B build -G "MinGW Makefiles"
 ```
 
 And then, just keep doing:
@@ -132,3 +132,6 @@ And then, just keep doing:
 cmake --build build
 cd build && ctest
 ```
+
+## Tests I have completed so far. 
+- LDA, with all its addressing modes ☑

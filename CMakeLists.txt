@@ -1,30 +1,51 @@
 cmake_minimum_required(VERSION 3.14)
 project(my_project)
 
-# GoogleTest requires at least C++17
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(FetchContent)
+
 FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    nlohmann_json
+    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
 )
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/releases/download/v1.17.0/googletest-1.17.0.tar.gz
+)
+
+FetchContent_MakeAvailable(nlohmann_json)
 FetchContent_MakeAvailable(googletest)
 
+include(CTest)
 enable_testing()
 
-add_executable(
-  6502_test
-  6502_test.cc
+add_executable(6502 src/6502.cpp)
+add_executable(my_tests tests/6502_test.cc)
+
+target_link_libraries(my_tests
+    PRIVATE
+        GTest::gtest_main
+        nlohmann_json::nlohmann_json
 )
 
-target_link_libraries(
-  6502_test
-  GTest::gtest_main
+target_link_libraries(6502
+    PRIVATE
+        nlohmann_json::nlohmann_json
+)
+
+target_include_directories(my_tests
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+file(COPY
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/entries
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/tests
 )
 
 include(GoogleTest)
-gtest_discover_tests(6502_test)
+gtest_discover_tests(my_tests)
