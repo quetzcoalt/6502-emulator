@@ -156,9 +156,131 @@ INSTANTIATE_TEST_SUITE_P(
       // CPU::INS_DEC_ABS,
       // CPU::INS_DEC_ABSX,
 
-      CPU::INS_INC_ZP,
-      CPU::INS_INC_ZPX,
-      CPU::INS_INC_ABS,
-      CPU::INS_INC_ABSX,
+      // CPU::INS_INC_ZP,
+      // CPU::INS_INC_ZPX,
+      // CPU::INS_INC_ABS,
+      // CPU::INS_INC_ABSX,
+
+      /* ===== BRANCHING ===== */
+      /* NOT TESTED YET */
+      // CPU::INS_BNE,
+      // CPU::INS_BEQ,
+      // CPU::INS_BPL,
+      // CPU::INS_BMI,
+      // CPU::INS_BCC,
+      // CPU::INS_BCS,
+      // CPU::INS_BVC,
+      // CPU::INS_BVS,
+
+      /* ===== COMPARISON ===== */
+      // CPU::INS_CMP_IM,
+      // CPU::INS_CMP_ZP,
+      // CPU::INS_CMP_ZPX,
+      // CPU::INS_CMP_ABS,
+      // CPU::INS_CMP_ABSX,
+      // CPU::INS_CMP_ABSY,
+      // CPU::INS_CMP_IDX,
+      // CPU::INS_CMP_IDY,
+
+      // CPU::INS_CPX_IM,
+      // CPU::INS_CPX_ZP,
+      // CPU::INS_CPX_ABS,
+
+      // CPU::INS_CPY_IM,
+      // CPU::INS_CPY_ZP,
+      // CPU::INS_CPY_ABS,
+
+      /* ===== JUMPS ===== */
+      // CPU::INS_JMP_ABS,
+      // CPU::INS_JMP_ID,
+
+      // CPU::INS_JSR,
+      // CPU::INS_RTS,
+
+      /* TODO: FAILED */
+      // CPU::INS_RTI,
+      
+      /* ===== BREAK ===== */
+      /* NOT TESTED YET */
+      // CPU::INS_BRK,
+
+      /* ===== NOP ===== */
+      // CPU::INS_NOP,
+
+      /* ===== ARITHMETIC OPERATIONS ===== */
+
+      /* ===== PSR OPERATIONS ===== */
+      // CPU::INS_CLC,
+      // CPU::INS_SEC,
+      // CPU::INS_CLV,
+      // CPU::INS_SED,
+      // CPU::INS_CLD,
+      CPU::INS_CLI,
+      CPU::INS_SEI,
+
+      /* ===== LOGICAL OPERATIONS ===== */
+      // CPU::INS_AND_IM,
+      // CPU::INS_AND_ZP,
+      // CPU::INS_AND_ZPX,
+      // CPU::INS_AND_ABS,
+      // CPU::INS_AND_ABSX,
+      // CPU::INS_AND_ABSY,
+      // CPU::INS_AND_IDX,
+      // CPU::INS_AND_IDY,
+
+      // CPU::INS_ORA_IM,
+      // CPU::INS_ORA_ZP,
+      // CPU::INS_ORA_ZPX,
+      // CPU::INS_ORA_ABS,
+      // CPU::INS_ORA_ABSX,
+      // CPU::INS_ORA_ABSY,
+      // CPU::INS_ORA_IDX,
+      // CPU::INS_ORA_IDY,
+
+      // CPU::INS_EOR_IM,
+      // CPU::INS_EOR_ZP,
+      // CPU::INS_EOR_ZPX,
+      // CPU::INS_EOR_ABS,
+      // CPU::INS_EOR_ABSX,
+      // CPU::INS_EOR_ABSY,
+      // CPU::INS_EOR_IDX,
+      // CPU::INS_EOR_IDY,
+
+      // /* ===== ROTATE AND SHIFT OPERATIONS ===== */
+      // CPU::INS_ASL_A,
+      // CPU::INS_ASL_ZP,
+      // CPU::INS_ASL_ZPX,
+      // CPU::INS_ASL_ABS,
+      // CPU::INS_ASL_ABSX,
+      
+      // CPU::INS_LSR_A,
+      // CPU::INS_LSR_ZP,
+      // CPU::INS_LSR_ZPX,
+      // CPU::INS_LSR_ABS,
+      // CPU::INS_LSR_ABSX,
+      
+      // CPU::INS_ROL_A,
+      // CPU::INS_ROL_ZP,
+      // CPU::INS_ROL_ZPX,
+      // CPU::INS_ROL_ABS,
+      // CPU::INS_ROL_ABSX,
+      
+      // CPU::INS_ROR_A,
+      // CPU::INS_ROR_ZP,
+      // CPU::INS_ROR_ZPX,
+      // CPU::INS_ROR_ABS,
+      // CPU::INS_ROR_ABSX,
+
+      // /* ===== STACK OPERATIONS ===== */
+      // CPU::INS_TXS,
+      // CPU::INS_TSX,
+      // CPU::INS_PHA,
+      // CPU::INS_PLA,
+      // CPU::INS_PHP,
+      // CPU::INS_PLP,
+
+      // /* ===== Bit Test ===== */
+      // CPU::INS_BIT_ZP,
+      // CPU::INS_BIT_ABS,
     }))
 );

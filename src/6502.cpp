@@ -77,25 +77,26 @@ int main()
     memory.Initialize();
 
     /* Instructions */
-    memory[42677] = 161;
-    memory[42678] = 176;
-    memory[42679] = 161;
-    memory[176] = 138;
-    memory[62] = 24;
-    memory[63] = 91;
-    memory[23320] = 69;
+    memory[34673] = 64;
+    memory[34674] = 156;
+    memory[34675] = 44;
+    memory[366] = 152;
+    memory[367] = 156;
+    memory[368] = 170;
+    memory[369] = 101;
+    memory[26026] = 14;
 
     /* Initializing CPU */
     CPU cpu;
     cpu.Reset(3, memory);
 
     /* Setting up registers */
-    cpu.PC = 42677;
-    cpu.S = 178;
-    cpu.A = 4;
-    cpu.X = 142;
-    cpu.Y = 1;
-    cpu.P = 38;
+    cpu.PC = 34673;
+    cpu.S = 110;
+    cpu.A = 162;
+    cpu.X = 129;
+    cpu.Y = 126;
+    cpu.P = 99;
 
     /* Execution */
     uint32_t cycles = cpu.Execute(6, memory);
@@ -105,6 +106,9 @@ int main()
     // memory.DebugPage(1);
     // memory.DebugPage(0x0001);
     printf("Cycles consumed: %d.\n", cycles);
+
+    printf("PC: %d\n S: %d\n A: %d\n X: %d\n Y: %d\n P: %d\n ", cpu.PC, cpu.S, cpu.A, cpu.X, cpu.Y, cpu.P);
+
 
     return 0;
 }

@@ -132,7 +132,7 @@ struct CPU
     uint8_t A, X, Y;
 
     // Stack Pointer
-    uint16_t S;
+    uint8_t S;
 
     // Status register
     /*
@@ -151,7 +151,7 @@ struct CPU
     {
         uint16_t ResetVector = 0xFFFC;
         PC = ReadWord(cycles, ResetVector, memory);
-        S = 0x01FF;
+        S = 0xFF;
         P = 0;
         A = X = Y = 0;
     }
@@ -711,69 +711,69 @@ struct CPU
                 {
                     uint8_t value = GetImmediate(cycles, memory);
 
-                    CMPSetStatus(A - value);
+                    CMPSetStatus(value, A);
                 } break;
                 case INS_CMP_ZP:        /* 3 cycles */
                 {
                     uint8_t value = GetZeroPage(cycles, memory);
 
-                    CMPSetStatus(A - value);
+                    CMPSetStatus(value, A);
                 } break;
                 case INS_CMP_ZPX:       /* 4 cycles */
                 {
                     uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
 
-                    CMPSetStatus(A - value);
+                    CMPSetStatus(value, A);
                 } break;
                 case INS_CMP_ABS:       /* 4 cycles */
                 {
                     uint8_t value = GetAbsolute(cycles, memory);
 
-                    CMPSetStatus(A - value);
+                    CMPSetStatus(value, A);
                 } break;
                 case INS_CMP_ABSX:      /* 4 (+1 if page crossed) */
                 {
                     uint8_t value = GetAbsoluteX(cycles, memory);
 
-                    CMPSetStatus(A - value);
+                    CMPSetStatus(value, A);
                 } break;
                 case INS_CMP_ABSY:      /* 4 (+1 if page crossed) */
                 {
                     uint8_t value = GetAbsoluteY(cycles, memory);
 
-                    CMPSetStatus(A - value);
+                    CMPSetStatus(value, A);
                 } break;
                 case INS_CMP_IDX:       /* 6 cycles → low and high addresses are in the zero page */
                 {
                     uint8_t value = GetIndirectX(cycles, memory);
 
-                    CMPSetStatus(A - value);
+                    CMPSetStatus(value, A);
                 } break;
                 case INS_CMP_IDY:       /* 5 cycles (+1 if page crossed) */
                 {
                     uint8_t value = GetIndirectY(cycles, memory);
 
-                    CMPSetStatus(A - value);
+                    CMPSetStatus(value, A);
                 } break;
 
                 /* CPX */
                 case INS_CPX_IM:        /* 2 cycles */
                 {
-                    int8_t value = GetImmediate(cycles, memory);
+                    uint8_t value = GetImmediate(cycles, memory);
 
-                    CMPSetStatus(X - value);
+                    CMPSetStatus(value, X);
                 } break;
                 case INS_CPX_ZP:        /* 3 cycles */
                 {
                     uint8_t value = GetZeroPage(cycles, memory);
 
-                    CMPSetStatus(X - value);
+                    CMPSetStatus(value, X);
                 } break;
                 case INS_CPX_ABS:       /* 4 cycles */
                 {
                     uint8_t value = GetAbsolute(cycles, memory);
 
-                    CMPSetStatus(X - value);
+                    CMPSetStatus(value, X);
                 } break;
 
                 /* CPY */
@@ -781,19 +781,19 @@ struct CPU
                 {
                     uint8_t value = GetImmediate(cycles, memory);
 
-                    CMPSetStatus(Y - value);
+                    CMPSetStatus(value, Y);
                 } break;
                 case INS_CPY_ZP:        /* 3 cycles */
                 {
                     uint8_t value = GetZeroPage(cycles, memory);
 
-                    CMPSetStatus(Y - value);
+                    CMPSetStatus(value, Y);
                 } break;
                 case INS_CPY_ABS:       /* 4 cycles */
                 {
                     uint8_t value = GetAbsolute(cycles, memory);
 
-                    CMPSetStatus(Y - value);
+                    CMPSetStatus(value, Y);
                 } break;
 
 
@@ -819,8 +819,8 @@ struct CPU
                 {
                     uint16_t Address = FetchWord(cycles, memory); // 3
 
-                    memory.WriteWord(PC, S, cycles); // 5
-                    S -= 2 ;
+                    memory.WriteWord(PC, 0x100 | S, cycles); // 5
+                    S = (uint8_t) (S - 2);
 
                     PC = Address;
                     cycles--;
@@ -829,12 +829,12 @@ struct CPU
                 /* RTS */
                 case INS_RTS:       /* 6 cycles */
                 {
-                    uint16_t ReturnAddress = ReadWord(cycles, S + 1, memory);
+                    uint16_t ReturnAddress = ReadWord(cycles, 0x100 | (S + 1), memory);
                     
-                    S += 2;
+                    S = (uint8_t) (S + 2);
                     cycles--; // +1 cycle to increment the stack pointer
 
-                    PC = ReturnAddress;
+                    PC = ReturnAddress + 1;
                     cycles--;
 
                     // 1-byte instructions consume an extra cycle.
@@ -844,11 +844,11 @@ struct CPU
                 /* RTI */
                 case INS_RTI:       /* 6 cycles */
                 {
-                    uint8_t flag = ReadByte(cycles, S + 1, memory);
+                    uint8_t flag = ReadByte(cycles, 0x100 | (S + 1), memory);
 
-                    uint16_t ReturnAddress = ReadWord(cycles, S + 2, memory);
+                    uint16_t ReturnAddress = ReadWord(cycles, 0x100 | (S + 2), memory);
 
-                    S += 3;
+                    S = (uint8_t) (S + 3);
                     cycles--; // +1 cycle to increment the stack pointer
 
                     PC = ReturnAddress;
@@ -866,10 +866,10 @@ struct CPU
                 case INS_BRK:   /* 7 cycles */
                 {   
                     /* The program counter and processor status are pushed on the stack */
-                    memory.WriteWord(PC, S, cycles);    // 3
+                    memory.WriteWord(PC, 0x100 | S, cycles);    // 3
                     S -= 2;
 
-                    memory.WriteByte(P, S, cycles);     // 4
+                    memory.WriteByte(P, 0x100 | S, cycles);     // 4
                     S--;
 
                     /* The content of the interrupt vector at $FFFE/F is loaded into the PC */ 
@@ -892,7 +892,6 @@ struct CPU
                 /* ---------- NOP ---------- */
                 case INS_NOP:   /* 2 cycles */
                 {
-                    PC++;
                     cycles--;
                 } break;
 
@@ -1419,8 +1418,9 @@ struct CPU
                     /* TODO: Exception object */
                     printf("Instruction not handled %02x\n", instruction);
 
-                    
                     cycles--;
+
+                    return TotalCycles - cycles;
                 } break;
             }
         }
@@ -1734,7 +1734,7 @@ struct CPU
         cycles--;
 
         /* Page crossing (+1 cycle) */
-        if ((oldPC >> 8) != (PC >> 8)) cycles--;
+        if ((oldPC & 0xFF00) != (PC & 0xFF00)) cycles--;
     }
 
     /* Setting statuses */
@@ -1745,11 +1745,11 @@ struct CPU
         SetStatusBit(NEGATIVE_BIT, (reg & 0b10000000) > 0);
     }
 
-    void CMPSetStatus(uint8_t difference)
+    void CMPSetStatus(uint8_t value, uint8_t reg)
     {
-        SetStatusBit(CARRY_BIT, difference >= 0);
-        SetStatusBit(ZERO_BIT, difference == 0);
-        SetStatusBit(NEGATIVE_BIT, (difference & 0b10000000) > 0);
+        SetStatusBit(CARRY_BIT, reg >= value);
+        SetStatusBit(ZERO_BIT, reg == value);
+        SetStatusBit(NEGATIVE_BIT, ((reg - value) & 0b10000000) > 0);
     }
 
     void LogicalSetStatus(uint8_t value)

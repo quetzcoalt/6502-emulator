@@ -154,3 +154,17 @@ cd build && ctest
 - DEC, with all its addressing modes ☑
 - INC, with all its addressing modes ☑
 
+- CMP, with all its addressing modes ☑
+- CPX, with all its addressing modes ☑
+- CPY, with all its addressing modes ☑
+
+- JMP, with all its addressing modes ☑
+- JSR ☑
+- RTS ☑
+
+- NOP ☑
+
+## Tests to look at later as a reminder to myself
+- Branching.
+- RTI. 
+- Arithmetic operations because I still have to implement arithmetics in the BCD mode.  
