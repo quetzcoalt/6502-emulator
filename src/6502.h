@@ -352,7 +352,9 @@ struct CPU
                     Address += X;
                     cycles--;
 
-                    uint16_t AddressValue = ReadWord(cycles, Address, memory);
+                    // Wraps around 0 page
+                    uint16_t AddressValue = memory[Address] | (memory[(uint8_t) (Address + 1)] << 8);
+                    cycles -= 2; 
 
                     memory[AddressValue] = A;
                     cycles--;
@@ -361,7 +363,9 @@ struct CPU
                 {
                     // STA ($40),Y
                     uint8_t Address = FetchByte(cycles, memory);
-                    uint16_t AddressValue = ReadWord(cycles, Address, memory);
+                    // Wraps around 0 page
+                    uint16_t AddressValue = memory[Address] | (memory[(uint8_t) (Address + 1)] << 8);
+                    cycles -= 2; 
 
                     uint16_t TargetAddress = AddressValue + Y;
                     cycles--;
@@ -1435,8 +1439,6 @@ struct CPU
         PC++;
         cycles--;
 
-        printf("Program counter is: %d\n", PC);
-
         return Data;
     }
 
@@ -1591,10 +1593,14 @@ struct CPU
         uint8_t Address = FetchByte(cycles, memory);
 
         Address += X;
+        printf("Address + X is: %d \n", Address);
+
         cycles--;
 
-        uint16_t AddressValue = ReadWord(cycles, Address, memory);
-        
+        // Wraps around 0 page
+        uint16_t AddressValue = memory[Address] | (memory[(uint8_t) (Address + 1)] << 8);
+        cycles -= 2; 
+
         uint8_t value = memory[AddressValue];
         cycles--;
 
@@ -1605,7 +1611,10 @@ struct CPU
     {
         // OPCODE ($40),Y
         uint8_t Address = FetchByte(cycles, memory);
-        uint16_t AddressValue = ReadWord(cycles, Address, memory);
+
+        // Wraps around 0 page
+        uint16_t AddressValue = memory[Address] | (memory[(uint8_t) (Address + 1)] << 8);
+        cycles -= 2; 
 
         uint16_t TargetAddress = AddressValue + Y;
 

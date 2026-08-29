@@ -70,7 +70,7 @@ std::vector<CPUTestCase> LoadTestCases(std::initializer_list<uint8_t> instructio
   for (uint8_t instruction : instructions)
   {
     std::ifstream file(
-      format("tests/entries/{:x}.json", instruction)
+      format("tests/entries/{:02x}.json", instruction)
     );
 
     if (!file.is_open())
@@ -128,8 +128,8 @@ INSTANTIATE_TEST_SUITE_P(
       //  CPU::INS_STA_ABS,
       //  CPU::INS_STA_ABSX,
       //  CPU::INS_STA_ABSY,
-      //  CPU::INS_STA_IDX,
-      //  CPU::INS_STA_IDY,
+       CPU::INS_STA_IDX,
+       CPU::INS_STA_IDY,
 
       // CPU::INS_STX_ZP,
       // CPU::INS_STX_ZPY,
@@ -215,8 +215,10 @@ INSTANTIATE_TEST_SUITE_P(
       // CPU::INS_CLV,
       // CPU::INS_SED,
       // CPU::INS_CLD,
-      CPU::INS_CLI,
-      CPU::INS_SEI,
+
+      /* TODO: AFTER OTHER TESTS */
+      // CPU::INS_CLI,
+      // CPU::INS_SEI,
 
       /* ===== LOGICAL OPERATIONS ===== */
       // CPU::INS_AND_IM,

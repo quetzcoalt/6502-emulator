@@ -164,7 +164,11 @@ cd build && ctest
 
 - NOP ☑
 
+- AND, with all its addressing modes ☑
+
+
 ## Tests to look at later as a reminder to myself
 - Branching.
 - RTI. 
 - Arithmetic operations because I still have to implement arithmetics in the BCD mode.  
+- CLI and SEI. 
