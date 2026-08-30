@@ -175,6 +175,8 @@ cd build && ctest
 - PHP ☑
 - PLP ☑
 
+- BIT, with all its addressing modes ☑
+
 ## Tests to look at later as a reminder to myself
 - Branching.
 - RTI. 

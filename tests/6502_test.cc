@@ -283,6 +283,6 @@ INSTANTIATE_TEST_SUITE_P(
 
       // /* ===== Bit Test ===== */
       CPU::INS_BIT_ZP,
-      // CPU::INS_BIT_ABS,
+      CPU::INS_BIT_ABS,
     }))
 );

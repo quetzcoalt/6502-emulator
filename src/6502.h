@@ -905,23 +905,25 @@ struct CPU
                 /* ---------- BIT ---------- */
                 case INS_BIT_ZP:   /* 3 cycles */
                 {
-                    uint8_t v = A & GetZeroPage(cycles, memory);
+                    uint8_t ZeroPageValue = GetZeroPage(cycles, memory);
+                    uint8_t v = A & ZeroPageValue;
 
-                    SetStatusBit(ZERO_BIT, A == 0);
+                    SetStatusBit(ZERO_BIT, v == 0);
 
-                    SetStatusBit(NEGATIVE_BIT, (v & 0x80) >> 7);
+                    SetStatusBit(NEGATIVE_BIT, (ZeroPageValue & 0x80) >> 7);
 
-                    SetStatusBit(OVERFLOW_BIT, (v & 0x40) >> 6);
+                    SetStatusBit(OVERFLOW_BIT, (ZeroPageValue & 0x40) >> 6);
                 } break;
                 case INS_BIT_ABS:   /* 4 cycles */
                 {
-                    uint8_t v = A & GetZeroPage(cycles, memory);
+                    uint8_t AbsoluteValue = GetAbsolute(cycles, memory);
+                    uint8_t v = A & AbsoluteValue;
 
-                    SetStatusBit(ZERO_BIT, A == 0);
+                    SetStatusBit(ZERO_BIT, v == 0);
 
-                    SetStatusBit(NEGATIVE_BIT, (A & 0x80) >> 7);
+                    SetStatusBit(NEGATIVE_BIT, (AbsoluteValue & 0x80) >> 7);
 
-                    SetStatusBit(OVERFLOW_BIT, (A & 0x40) >> 6);
+                    SetStatusBit(OVERFLOW_BIT, (AbsoluteValue & 0x40) >> 6);
                 } break;
 
 
