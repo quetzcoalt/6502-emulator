@@ -1768,34 +1768,34 @@ struct CPU
     /* Repetitive Operations */
     void ADC(uint8_t value)
     {
-        uint16_t sum;
         uint8_t carry_bit = GetStatusBit(CARRY_BIT);
+
+        uint16_t sum = A + value + carry_bit;
+        uint8_t oldA = A;
 
         if (GetStatusBit(DECIMAL_BIT))
         {
-            sum = BCD(BCD(A, value), carry_bit);
+            A = BCDAddition(A, value, carry_bit); /* Sets the carry flag */
         } else
         {
-            sum = A + value + carry_bit;
+            A = A + value + carry_bit;
+
+            uint8_t carry = sum > 0xFF;
+
+            /* Carry flag */
+            SetStatusBit(CARRY_BIT, carry);
         }
-                    
-        uint8_t carry = sum > 0xFF;
 
-        uint8_t overflow = (((A ^ sum) & (value ^ sum) & 0b10000000) != 0);
+        uint8_t overflow = (((oldA ^ sum) & (value ^ sum) & 0x80) != 0);
 
-        A = sum;
-
-        /* Carry flag */
-        SetStatusBit(CARRY_BIT, carry);
+        /* Negative flag */
+        SetStatusBit(NEGATIVE_BIT, (sum & 0b10000000) > 0);
 
         /* Zero Flag */
-        SetStatusBit(ZERO_BIT, A == 0);
+        SetStatusBit(ZERO_BIT, oldA == 0);
 
         /* Overflow flag */
         SetStatusBit(OVERFLOW_BIT, overflow);
-
-        /* Negative flag */
-        SetStatusBit(NEGATIVE_BIT, (A & 0b10000000) > 0);
     }
 
     void AND(uint8_t value)
@@ -1859,18 +1859,32 @@ struct CPU
 
 
     // TODO: make this function better, it doesn't cover all cases.
-    uint8_t BCD(uint8_t x, uint8_t y)
+    uint8_t BCDAddition(uint8_t x, uint8_t y, bool carry)
     {
-        uint8_t first = (0b00001111 & x) + (0b00001111 & y);
-        uint8_t second = (0b11110000 & x) + (0b11110000 & y);
+        uint8_t result;
 
-        if (first > 0x09) first += 6;
-        
-        if (second > 0x09) second += 6;
+        uint8_t low = (x & 0x0F) + (y & 0x0F) + carry;
+        uint8_t high = (x >> 4) + (y >> 4);
 
-        printf("BCD addition: %04x\n", ((second >> 4) * 10) + first);
+        if (low > 9)
+        {
+            low -= 10;
 
-        return ((second >> 4) * 10) + first;
+            // The 1 needs to be carried into the tens digit
+            high++;
+        }
+
+        uint8_t c = 0;
+
+        if (high > 9)
+        {
+            high -= 10;
+            c = 1;
+        }
+
+        SetStatusBit(CARRY_BIT, c);
+
+        return (high << 4) | low;
     }
 
     /* Branch Helpers */

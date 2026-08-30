@@ -208,6 +208,23 @@ INSTANTIATE_TEST_SUITE_P(
       // CPU::INS_NOP,
 
       /* ===== ARITHMETIC OPERATIONS ===== */
+      CPU::INS_ADC_IM,
+      CPU::INS_ADC_ZP,
+      CPU::INS_ADC_ZPX,
+      CPU::INS_ADC_ABS,
+      CPU::INS_ADC_ABSX,
+      CPU::INS_ADC_ABSY,
+      CPU::INS_ADC_IDX,
+      CPU::INS_ADC_IDY,
+
+      // CPU::INS_SBC_IM,
+      // CPU::INS_SBC_ZP,
+      // CPU::INS_SBC_ZPX,
+      // CPU::INS_SBC_ABS,
+      // CPU::INS_SBC_ABSX,
+      // CPU::INS_SBC_ABSY,
+      // CPU::INS_SBC_IDX,
+      // CPU::INS_SBC_IDY, 
 
       /* ===== PSR OPERATIONS ===== */
       // CPU::INS_CLC,
@@ -282,7 +299,7 @@ INSTANTIATE_TEST_SUITE_P(
       // CPU::INS_PLP,
 
       // /* ===== Bit Test ===== */
-      CPU::INS_BIT_ZP,
-      CPU::INS_BIT_ABS,
+      // CPU::INS_BIT_ZP,
+      // CPU::INS_BIT_ABS,
     }))
 );
