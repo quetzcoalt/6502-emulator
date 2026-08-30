@@ -77,28 +77,26 @@ int main()
     memory.Initialize();
 
     /* Instructions */
-    memory[33397] = 1;
-    memory[33398] = 52;
-    memory[33399] = 150;
-    memory[52] = 9;
-    memory[255] = 95;
-    memory[0] = 111;
-    memory[28511] = 131;
+    memory[42290] = 40;
+    memory[42291] = 198;
+    memory[42292] = 151;
+    memory[419] = 48;
+    memory[420] = 148;
 
     /* Initializing CPU */
     CPU cpu;
     cpu.Reset(3, memory);
 
     /* Setting up registers */
-    cpu.PC = 33397;
-    cpu.S = 244;
-    cpu.A = 224;
-    cpu.X = 203;
-    cpu.Y = 113;
-    cpu.P = 169;
+    cpu.PC = 42290;
+    cpu.S = 163;
+    cpu.A = 158;
+    cpu.X = 119;
+    cpu.Y = 110;
+    cpu.P = 173;
 
     /* Execution */
-    uint32_t cycles = cpu.Execute(6, memory);
+    uint32_t cycles = cpu.Execute(4, memory);
 
     /* Debugging */
     cpu.Debug();

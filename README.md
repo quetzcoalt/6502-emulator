@@ -165,7 +165,15 @@ cd build && ctest
 - NOP ☑
 
 - AND, with all its addressing modes ☑
+- EOR, with all its addressing modes ☑
+- ORA, with all its addressing modes ☑
 
+- TXS ☑
+- TSX ☑
+- PHA ☑
+- PLA ☑
+- PHP ☑
+- PLP ☑
 
 ## Tests to look at later as a reminder to myself
 - Branching.

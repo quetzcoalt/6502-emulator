@@ -128,8 +128,8 @@ INSTANTIATE_TEST_SUITE_P(
       //  CPU::INS_STA_ABS,
       //  CPU::INS_STA_ABSX,
       //  CPU::INS_STA_ABSY,
-       CPU::INS_STA_IDX,
-       CPU::INS_STA_IDY,
+      //  CPU::INS_STA_IDX,
+      //  CPU::INS_STA_IDY,
 
       // CPU::INS_STX_ZP,
       // CPU::INS_STX_ZPY,
@@ -282,7 +282,7 @@ INSTANTIATE_TEST_SUITE_P(
       // CPU::INS_PLP,
 
       // /* ===== Bit Test ===== */
-      // CPU::INS_BIT_ZP,
+      CPU::INS_BIT_ZP,
       // CPU::INS_BIT_ABS,
     }))
 );

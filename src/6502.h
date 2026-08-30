@@ -905,15 +905,19 @@ struct CPU
                 /* ---------- BIT ---------- */
                 case INS_BIT_ZP:   /* 3 cycles */
                 {
-                    A &= GetZeroPage(cycles, memory);
+                    uint8_t v = A & GetZeroPage(cycles, memory);
 
-                    SetStatusBit(NEGATIVE_BIT, (A & 0x80) >> 7);
+                    SetStatusBit(ZERO_BIT, A == 0);
 
-                    SetStatusBit(OVERFLOW_BIT, (A & 0x40) >> 6);
+                    SetStatusBit(NEGATIVE_BIT, (v & 0x80) >> 7);
+
+                    SetStatusBit(OVERFLOW_BIT, (v & 0x40) >> 6);
                 } break;
                 case INS_BIT_ABS:   /* 4 cycles */
                 {
-                    A &= GetAbsolute(cycles, memory);
+                    uint8_t v = A & GetZeroPage(cycles, memory);
+
+                    SetStatusBit(ZERO_BIT, A == 0);
 
                     SetStatusBit(NEGATIVE_BIT, (A & 0x80) >> 7);
 
@@ -1224,128 +1228,249 @@ struct CPU
                 /* ASL */
                 case INS_ASL_A:        /* 2 cycles */
                 {
+                    A = ASL(A);
 
-                    ASL(A);
+                    /* 1-byte instruction penalty */
+                    cycles--;
                 } break;
                 case INS_ASL_ZP:        /* 5 cycles */
                 {
-                    uint8_t value = GetZeroPage(cycles, memory);
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);  // 1
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory); // 1
 
-                    ASL(value);
+                    uint8_t result = ASL(zeroPageValue);
+                    cycles--;
+
+                    memory.WriteByte(result, zeroPageAddress, cycles); // 1
                 } break;
                 case INS_ASL_ZPX:        /* 6 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);
                     
-                    ASL(value);
+                    zeroPageAddress += X;
+
+                    if (zeroPageAddress > ZERO_PAGE_END) {
+                        return TotalCycles - cycles;
+                    }
+
+                    cycles--;
+
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+
+                    uint8_t result = ASL(zeroPageValue);
+                    cycles--;
+
+                    memory.WriteByte(result, zeroPageAddress, cycles);
                 } break;
                 case INS_ASL_ABS:       /* 6 cycles */
                 {
-                    uint8_t value = GetAbsolute(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
 
-                    ASL(value);
+                    uint8_t result = ASL(AddressValue);
+                    cycles--;
+
+                    memory.WriteByte(result, Address, cycles);
                 } break;
                 case INS_ASL_ABSX:       /* 7 cycles */
                 {
-                    uint8_t value = GetAbsoluteX(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);   // 3
+                    
+                    uint16_t TargetAddress = Address + X;
+                    cycles--;
+                    
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory); // 4
 
-                    ASL(value);
+                    uint8_t result = ASL(AddressValue);
+                    cycles--;   // 5
+
+                    memory.WriteByte(result, TargetAddress, cycles);    // 6
                 } break;
 
                 /* LSR */
                 case INS_LSR_A:        /* 2 cycles */
                 {
-                    uint8_t value = GetImmediate(cycles, memory);
+                    A = LSR(A);
 
-                    LSR(value);
+                    /* 1-byte instruction penalty */
+                    cycles--;
                 } break;
                 case INS_LSR_ZP:        /* 5 cycles */
                 {
-                    uint8_t value = GetZeroPage(cycles, memory);
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);  // 1
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory); // 1
 
-                    LSR(value);
+                    uint8_t result = LSR(zeroPageValue);
+                    cycles--;
+
+                    memory.WriteByte(result, zeroPageAddress, cycles); // 1
                 } break;
                 case INS_LSR_ZPX:        /* 6 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);
                     
-                    LSR(value);
+                    zeroPageAddress += X;
+
+                    if (zeroPageAddress > ZERO_PAGE_END) {
+                        return TotalCycles - cycles;
+                    }
+
+                    cycles--;
+
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+
+                    uint8_t result = LSR(zeroPageValue);
+                    cycles--;
+
+                    memory.WriteByte(result, zeroPageAddress, cycles);
                 } break;
                 case INS_LSR_ABS:       /* 6 cycles */
                 {
-                    uint8_t value = GetAbsolute(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
 
-                    LSR(value);
+                    uint8_t result = LSR(AddressValue);
+                    cycles--;
+
+                    memory.WriteByte(result, Address, cycles);
                 } break;
                 case INS_LSR_ABSX:       /* 7 cycles */
                 {
-                    uint8_t value = GetAbsoluteX(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);
+                    
+                    uint16_t TargetAddress = Address + X;
+                    cycles--;
 
-                    LSR(value);
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
+
+                    uint8_t result = LSR(AddressValue);
+                    cycles--;
+
+                    memory.WriteByte(result, TargetAddress, cycles);
                 } break;
 
                 /* ROL */
                 case INS_ROL_A:        /* 2 cycles */
                 {
-                    uint8_t value = GetImmediate(cycles, memory);
+                    A = ROL(A);
 
-                    ROL(value);
+                    /* 1-byte instruction penalty */
+                    cycles--;
                 } break;
-            case INS_ROL_ZP:        /* 5 cycles */
+                case INS_ROL_ZP:        /* 5 cycles */
                 {
-                    uint8_t value = GetZeroPage(cycles, memory);
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);  // 1
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory); // 1
 
-                    ROL(value);
+                    uint8_t result = ROL(zeroPageValue);
+                    cycles--;
+
+                    memory.WriteByte(result, zeroPageAddress, cycles); // 1
                 } break;
                 case INS_ROL_ZPX:        /* 6 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);
                     
-                    ROL(value);
+                    zeroPageAddress += X;
+
+                    if (zeroPageAddress > ZERO_PAGE_END) {
+                        return TotalCycles - cycles;
+                    }
+
+                    cycles--;
+
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+
+                    uint8_t result = ROL(zeroPageValue);
+                    cycles--;
+
+                    memory.WriteByte(result, zeroPageAddress, cycles);
                 } break;
                 case INS_ROL_ABS:       /* 6 cycles */
                 {
-                    uint8_t value = GetAbsolute(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
 
-                    ROL(value);
+                    uint8_t result = ROL(AddressValue);
+                    cycles--;
+
+                    memory.WriteByte(result, Address, cycles);
                 } break;
                 case INS_ROL_ABSX:       /* 7 cycles */
                 {
-                    uint8_t value = GetAbsoluteX(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);
+                    
+                    uint16_t TargetAddress = Address + X;
+                    cycles--;
 
-                    ROL(value);
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
+
+                    uint8_t result = ROL(AddressValue);
+                    cycles--;
+
+                    memory.WriteByte(result, TargetAddress, cycles);
                 } break;
 
                 /* ROR */
                 case INS_ROR_A:        /* 2 cycles */
                 {
-                    uint8_t value = GetImmediate(cycles, memory);
+                    A = ROR(A);
 
-                    ROR(value);
+                    /* 1-byte instruction penalty */
+                    cycles--;
                 } break;
                 case INS_ROR_ZP:        /* 5 cycles */
                 {
-                    uint8_t value = GetZeroPage(cycles, memory);
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);  // 1
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory); // 1
 
-                    ROR(value);
+                    uint8_t result = ROR(zeroPageValue);
+                    cycles--;
+
+                    memory.WriteByte(result, zeroPageAddress, cycles); // 1
                 } break;
                 case INS_ROR_ZPX:        /* 6 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t zeroPageAddress = FetchByte(cycles, memory);
                     
-                    ROR(value);
+                    zeroPageAddress += X;
+
+                    if (zeroPageAddress > ZERO_PAGE_END) {
+                        return TotalCycles - cycles;
+                    }
+
+                    cycles--;
+
+                    uint8_t zeroPageValue = ReadByte(cycles, zeroPageAddress, memory);
+
+                    uint8_t result = ROR(zeroPageValue);
+                    cycles--;
+
+                    memory.WriteByte(result, zeroPageAddress, cycles);
                 } break;
                 case INS_ROR_ABS:       /* 6 cycles */
                 {
-                    uint8_t value = GetAbsolute(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);
+                    uint8_t AddressValue = ReadByte(cycles, Address, memory);
 
-                    ROR(value);
+                    uint8_t result = ROR(AddressValue);
+                    cycles--;
+
+                    memory.WriteByte(result, Address, cycles);
                 } break;
                 case INS_ROR_ABSX:       /* 7 cycles */
                 {
-                    uint8_t value = GetAbsoluteX(cycles, memory);
+                    uint16_t Address = FetchWord(cycles, memory);
+                    
+                    uint16_t TargetAddress = Address + X;
+                    cycles--;
 
-                    ROR(value);
+                    uint8_t AddressValue = ReadByte(cycles, TargetAddress, memory);
+
+                    uint8_t result = ROR(AddressValue);
+                    cycles--;
+
+                    memory.WriteByte(result, TargetAddress, cycles);
                 } break;
 
 
@@ -1354,7 +1479,7 @@ struct CPU
                 /* ---------- STACK OPERATIONS ---------- */
                 case INS_TXS:   /* 2 cycles */
                 {
-                    S &= (X | 0x100);
+                    S = (X | 0x100);
                     cycles--;
                 } break;
                 case INS_TSX:   /* 2 cycles */
@@ -1373,17 +1498,17 @@ struct CPU
                     memory[S] = A;
                     cycles--;
 
-                    S = (uint16_t) 0x100 | ((uint8_t) (S - 1));
+                    S = (uint8_t) (S - 1);
                     
                     // 1-byte instructions consume an extra cycle.
                     cycles--;
                 } break;
                 case INS_PLA:   /* 4 cycles */
                 {
-                    S = (uint16_t) 0x100 | ((uint8_t) (S + 1));
+                    S = (uint8_t) (S + 1);
                     cycles--;
 
-                    A = memory[S];
+                    A = memory[0x100 | S];
                     cycles--;
 
                     SetStatusBit(ZERO_BIT, A == 0);
@@ -1395,21 +1520,26 @@ struct CPU
                 } break;
                 case INS_PHP:   /* 3 cycles */
                 {
-                    memory[S] = P;
+                    memory[0x100 | S] = P;
                     cycles--;
 
-                    S = (uint16_t) 0x100 | ((uint8_t) (S - 1));
+                    S = (uint8_t) (S - 1);
                     
                     // 1-byte instructions consume an extra cycle.
                     cycles--;
                 } break;
                 case INS_PLP:   /* 4 cycles */
                 {
-                    S = (uint16_t) 0x100 | ((uint8_t) (S + 1));
+                    S = (uint8_t) (S + 1);
                     cycles--;
 
-                    P = memory[S];
+                    uint8_t oldP = P;
+
+                    P = memory[0x100 | S];
                     cycles--;
+
+                    SetStatusBit(BREAK_BIT, GetBit(oldP, BREAK_BIT));
+                    SetStatusBit(5, GetBit(oldP, 5));
 
                     // 1-byte instructions consume an extra cycle.
                     cycles--;
@@ -1484,6 +1614,11 @@ struct CPU
     {
 
         return (P >> position) & 0b00000001;
+    }
+
+    uint8_t GetBit(uint8_t value, uint32_t position)
+    {
+        return (value >> position) & 0b00000001;
     }
 
     void SetStatusBit(uint32_t position, uint8_t bitToWrite)
@@ -1593,7 +1728,6 @@ struct CPU
         uint8_t Address = FetchByte(cycles, memory);
 
         Address += X;
-        printf("Address + X is: %d \n", Address);
 
         cycles--;
 
@@ -1683,36 +1817,42 @@ struct CPU
         LogicalSetStatus(A);
     }
 
-    void ASL(uint8_t value)
+    uint8_t ASL(uint8_t value)
     {
-        A = (value << 1);
+        uint8_t v = (value << 1);
 
-        LeftSetStatus(value, A);
+        LeftSetStatus(value, v);
+
+        return v;
     }
 
-    void LSR(uint8_t value)
+    uint8_t LSR(uint8_t value)
     {
-        A = (value >> 1);
+        uint8_t v = (value >> 1);
 
-        LeftSetStatus(value, A);
+        RightSetStatus(value, v);
+
+        return v;
     }
 
-    void ROL(uint8_t value)
+    uint8_t ROL(uint8_t value)
     {
-        int8_t lastBit = (value & 0x80) >> 7;
+        // uint8_t lastBit = (value & 0x80) >> 7;
 
-        A = (value << 1) | lastBit;
+        uint8_t v = (value << 1) | GetStatusBit(CARRY_BIT);
 
-        RightSetStatus(value, A);
+        LeftSetStatus(value, v);
+
+        return v;
     }
 
-    void ROR(uint8_t value)
+    uint8_t ROR(uint8_t value)
     {
-        uint8_t firstBit = value & 1;
+        uint8_t v = (value >> 1) | (GetStatusBit(CARRY_BIT) << 7);
 
-        A = (value >> 1) | (firstBit << 7);
+        RightSetStatus(value, v);
 
-        RightSetStatus(value, A);
+        return v;
     }
 
 
@@ -1773,7 +1913,7 @@ struct CPU
     void LeftSetStatus(uint8_t oldValue, uint8_t value)
     {
         /* Set to contents of old bit 7 */
-        SetStatusBit(CARRY_BIT, oldValue & 0b10000000);
+        SetStatusBit(CARRY_BIT, (oldValue & 0b10000000) >> 7);
 
         SetStatusBit(ZERO_BIT, value == 0);
 
