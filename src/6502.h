@@ -856,7 +856,13 @@ struct CPU
                     cycles--; // +1 cycle to increment the stack pointer
 
                     PC = ReturnAddress;
+                    
+                    /* Setting the flag register */
+                    uint8_t oldP = P;
                     P = flag;
+
+                    SetStatusBit(BREAK_BIT, GetBit(oldP, BREAK_BIT));
+                    SetStatusBit(5, GetBit(oldP, 5));
 
                     // 1-byte instructions consume an extra cycle.
                     cycles--;
@@ -880,12 +886,10 @@ struct CPU
                     uint16_t interrupt_content = ReadWord(cycles, 0xFFFE, memory); // 6
                     PC = interrupt_content;
                     
-                    /* The break flag in the status set to one. */
-                    SetStatusBit(BREAK_BIT, 1);
+                    /* The interrupt flag in the status set to one. */
+                    SetStatusBit(INTERRUPT_DISABLE_BIT, 1);
 
-                    printf("\e%sEOF!\e[0m\n", GREEN);
-
-                    /* Cycle for the 1-byte instruction penaltyf */
+                    /* Cycle for the 1-byte instruction penalty */
                     cycles--;       // 7
                     return TotalCycles - cycles;
                 } break;

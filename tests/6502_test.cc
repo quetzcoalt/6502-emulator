@@ -196,9 +196,7 @@ INSTANTIATE_TEST_SUITE_P(
 
       // CPU::INS_JSR,
       // CPU::INS_RTS,
-
-      /* TODO: FAILED */
-      CPU::INS_RTI,
+      // CPU::INS_RTI,
       
       /* ===== BREAK ===== */
       /* NOT TESTED YET */

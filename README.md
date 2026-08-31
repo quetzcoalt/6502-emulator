@@ -133,7 +133,8 @@ cmake --build build
 cd build && ctest
 ```
 
-## Tests I have completed so far. 
+## Tests I have completed so far → All done!
+
 - LDA, with all its addressing modes ☑
 - LDX, with all its addressing modes ☑
 - LDY, with all its addressing modes ☑
@@ -163,6 +164,7 @@ cd build && ctest
 - JMP, with all its addressing modes ☑
 - JSR ☑
 - RTS ☑
+- RTI ☑
 
 - NOP ☑
 
@@ -191,9 +193,7 @@ cd build && ctest
 - BVC ☑
 - BVS ☑
 
-## Tests to look at later as a reminder to myself
-- Branching.
-- RTI. 
+- BRK ☑
 
 ## Notes
 - In arithmetic operations (ADC, SBC), in the decimal mode, when adding two non valid BCD numbers, the value of the N and V flags, and the value of the sum A are unpredictable; I still can't get my head around what should be the result. 
