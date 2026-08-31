@@ -193,7 +193,7 @@ struct CPU
                 } break;
                 case INS_LDA_ZPX:   /* 4 cycles */
                 {
-                    A = GetZeroPageX(cycles, memory, TotalCycles);
+                    A = GetZeroPageX(cycles, memory);
                     
                     LDSetStatus(A);
                 } break;
@@ -246,7 +246,7 @@ struct CPU
                 } break;
                 case INS_LDX_ZPY:   /* 4 cycles */
                 {
-                    X = GetZeroPageY(cycles, memory, TotalCycles);
+                    X = GetZeroPageY(cycles, memory);
                     
                     LDSetStatus(X);
                 } break;
@@ -280,7 +280,7 @@ struct CPU
                 } break;
                 case INS_LDY_ZPX:   /* 4 cycles */
                 {
-                    Y = GetZeroPageX(cycles, memory, TotalCycles);
+                    Y = GetZeroPageX(cycles, memory);
                     
                     LDSetStatus(Y);
                 } break;
@@ -635,74 +635,74 @@ struct CPU
                 /* ---------- BRANCHING ---------- */
                 case INS_BNE:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
+                    int8_t offset = FetchByte(cycles, memory);
+
                     /* If the zero flag is clear */
                     if (GetStatusBit(ZERO_BIT) == 0) {
-                        Branch(cycles, memory);
-                    } else {
-                        PC++;
+                        Branch(cycles, memory, offset);
                     }
                 } break;
                 case INS_BEQ:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
+                    int8_t offset = FetchByte(cycles, memory);
+
                     /* If the zero flag is set */
                     if (GetStatusBit(ZERO_BIT) == 1) {
-                        Branch(cycles, memory);
-                    } else {
-                        PC++;
+                        Branch(cycles, memory, offset);
                     }
                 } break;
                 case INS_BPL:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
+                    int8_t offset = FetchByte(cycles, memory);
+                    
                     /* If negative flag is clear */
                     if (GetStatusBit(NEGATIVE_BIT) == 0) {
-                        Branch(cycles, memory);
-                    } else {
-                        PC++;
+                        Branch(cycles, memory, offset);
                     }
                 } break;
                 case INS_BMI:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
+                    int8_t offset = FetchByte(cycles, memory);
+                    
                     /* If negative flag is set */
                     if (GetStatusBit(NEGATIVE_BIT) == 1) {
-                        Branch(cycles, memory);
-                    } else {
-                        PC++;
+                        Branch(cycles, memory, offset);
                     }
                 } break;
                 case INS_BCC:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
+                    int8_t offset = FetchByte(cycles, memory);
+                    
                     /* If carry flag is clear */
                     if (GetStatusBit(CARRY_BIT) == 0) {
-                        Branch(cycles, memory);
-                    } else {
-                        PC++;
+                        Branch(cycles, memory, offset);
                     }
                 } break;
                 case INS_BCS:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
+                    int8_t offset = FetchByte(cycles, memory);
+                    
                     /* If carry flag is set */
                     if (GetStatusBit(CARRY_BIT) == 1) {
-                        Branch(cycles, memory);
-                    } else {
-                        PC++;
+                        Branch(cycles, memory, offset);
                     }
                 } break;
                 case INS_BVC:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
+                    int8_t offset = FetchByte(cycles, memory);
+                    
                     /* If overflow flag is clear */
                     if (GetStatusBit(OVERFLOW_BIT) == 0) {
-                        Branch(cycles, memory);
-                    } else {
-                        PC++;
+                        Branch(cycles, memory, offset);
                     }
                 } break;
                 case INS_BVS:   // 2 cycles (+1 if branch succeeds, +2 if to a new page)
                 {
+                    int8_t offset = FetchByte(cycles, memory);
+                    
                     /* If overflow flag is set */
                     if (GetStatusBit(OVERFLOW_BIT) == 1) {
-                        Branch(cycles, memory);
-                    } else {
-                        PC++;
+                        Branch(cycles, memory, offset);
                     }
                 } break;
 
@@ -725,7 +725,7 @@ struct CPU
                 } break;
                 case INS_CMP_ZPX:       /* 4 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t value = GetZeroPageX(cycles, memory);
 
                     CMPSetStatus(value, A);
                 } break;
@@ -942,7 +942,7 @@ struct CPU
                 } break;
                 case INS_ADC_ZPX:        /* 4 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t value = GetZeroPageX(cycles, memory);
                     
                     ADC(value);
                 } break;
@@ -982,49 +982,97 @@ struct CPU
                 {
                     uint8_t value = GetImmediate(cycles, memory);
 
-                    ADC(~value);
+                    if (GetStatusBit(DECIMAL_BIT))
+                    {
+                        SBC(value);
+                    } else
+                    {
+                        ADC(~value);
+                    }
                 } break;
                 case INS_SBC_ZP:        /* 3 cycles */
                 {
                     uint8_t value = GetZeroPage(cycles, memory);
 
-                    ADC(~value);
+                    if (GetStatusBit(DECIMAL_BIT))
+                    {
+                        SBC(value);
+                    } else
+                    {
+                        ADC(~value);
+                    }
                 } break;
                 case INS_SBC_ZPX:        /* 4 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t value = GetZeroPageX(cycles, memory);
                     
-                    ADC(~value);
+                    if (GetStatusBit(DECIMAL_BIT))
+                    {
+                        SBC(value);
+                    } else
+                    {
+                        ADC(~value);
+                    }
                 } break;
                 case INS_SBC_ABS:       /* 4 cycles */
                 {
                     uint8_t value = GetAbsolute(cycles, memory);
 
-                    ADC(~value);
+                    if (GetStatusBit(DECIMAL_BIT))
+                    {
+                        SBC(value);
+                    } else
+                    {
+                        ADC(~value);
+                    }
                 } break;
                 case INS_SBC_ABSX:       /* 4 cycles (+1 if page crossed) */
                 {
                     uint8_t value = GetAbsoluteX(cycles, memory);
 
-                    ADC(~value);
+                    if (GetStatusBit(DECIMAL_BIT))
+                    {
+                        SBC(value);
+                    } else
+                    {
+                        ADC(~value);
+                    }
                 } break;
                 case INS_SBC_ABSY:       /* 4 cycles (+1 if page crossed) */
                 {
                     uint8_t value = GetAbsoluteY(cycles, memory);
 
-                    ADC(~value);
+                    if (GetStatusBit(DECIMAL_BIT))
+                    {
+                        SBC(value);
+                    } else
+                    {
+                        ADC(~value);
+                    }
                 } break;
                 case INS_SBC_IDX:       /* 6 cycles */
                 {
                     uint8_t value = GetIndirectX(cycles, memory);
 
-                    ADC(~value);
+                    if (GetStatusBit(DECIMAL_BIT))
+                    {
+                        SBC(value);
+                    } else
+                    {
+                        ADC(~value);
+                    }
                 } break;
                 case INS_SBC_IDY:       /* 5 (+1 if page crossed) */
                 {
                     uint8_t value = GetIndirectY(cycles, memory);
 
-                    ADC(~value);
+                    if (GetStatusBit(DECIMAL_BIT))
+                    {
+                        SBC(value);
+                    } else
+                    {
+                        ADC(~value);
+                    }
                 } break;
 
 
@@ -1060,12 +1108,12 @@ struct CPU
                 {
                     SetStatusBit(INTERRUPT_DISABLE_BIT, 0);
                     cycles--;
-                }
+                } break;
                 case INS_SEI:   /* 2 cycles */
                 {
                     SetStatusBit(INTERRUPT_DISABLE_BIT, 1);
                     cycles--;
-                }
+                } break;
 
 
 
@@ -1086,7 +1134,7 @@ struct CPU
                 } break;
                 case INS_AND_ZPX:        /* 4 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t value = GetZeroPageX(cycles, memory);
                     
                     AND(value);
                 } break;
@@ -1137,7 +1185,7 @@ struct CPU
                 } break;
                 case INS_ORA_ZPX:        /* 4 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t value = GetZeroPageX(cycles, memory);
                     
                     ORA(value);
                 } break;
@@ -1188,7 +1236,7 @@ struct CPU
                 } break;
                 case INS_EOR_ZPX:        /* 4 cycles */
                 {
-                    uint8_t value = GetZeroPageX(cycles, memory, TotalCycles);
+                    uint8_t value = GetZeroPageX(cycles, memory);
                     
                     EOR(value);
                 } break;
@@ -1652,15 +1700,11 @@ struct CPU
         return zeroPageValue;
     }
 
-    uint8_t GetZeroPageX(uint32_t &cycles, Memory &memory, uint32_t TotalCycles)
+    uint8_t GetZeroPageX(uint32_t &cycles, Memory &memory)
     {
         uint8_t zeroPageAddress = FetchByte(cycles, memory);
                     
-        zeroPageAddress += X;
-
-        if (zeroPageAddress > ZERO_PAGE_END) {
-            return TotalCycles - cycles;
-        }
+        zeroPageAddress = zeroPageAddress + X;
 
         cycles--;
 
@@ -1669,15 +1713,11 @@ struct CPU
         return zeroPageValue;
     }
 
-    uint8_t GetZeroPageY(uint32_t &cycles, Memory &memory, uint32_t TotalCycles)
+    uint8_t GetZeroPageY(uint32_t &cycles, Memory &memory)
     {
         uint8_t zeroPageAddress = FetchByte(cycles, memory);
                     
         zeroPageAddress += Y;
-
-        if (zeroPageAddress > ZERO_PAGE_END) {
-            return TotalCycles - cycles;
-        }
 
         cycles--;
 
@@ -1771,7 +1811,9 @@ struct CPU
         uint8_t carry_bit = GetStatusBit(CARRY_BIT);
 
         uint16_t sum = A + value + carry_bit;
-        uint8_t oldA = A;
+        uint16_t oldA = A;
+
+        uint8_t overflow = (((oldA ^ sum) & (value ^ sum) & 0x80) != 0);
 
         if (GetStatusBit(DECIMAL_BIT))
         {
@@ -1783,19 +1825,43 @@ struct CPU
             uint8_t carry = sum > 0xFF;
 
             /* Carry flag */
-            SetStatusBit(CARRY_BIT, carry);
+            SetStatusBit(CARRY_BIT, carry);            
         }
 
-        uint8_t overflow = (((oldA ^ sum) & (value ^ sum) & 0x80) != 0);
-
-        /* Negative flag */
-        SetStatusBit(NEGATIVE_BIT, (sum & 0b10000000) > 0);
-
         /* Zero Flag */
-        SetStatusBit(ZERO_BIT, oldA == 0);
+        SetStatusBit(ZERO_BIT, A == 0);
 
         /* Overflow flag */
         SetStatusBit(OVERFLOW_BIT, overflow);
+
+        /* Negative flag */
+        SetStatusBit(NEGATIVE_BIT, (sum & 0b10000000) > 0);
+    }
+
+    void SBC(uint8_t value)
+    {
+        uint8_t carry_bit = GetStatusBit(CARRY_BIT);
+        uint16_t oldA = A;
+
+        uint16_t sum = A + ~(value) + carry_bit;
+        uint8_t overflow = (((oldA ^ sum) & ((~value) ^ sum) & 0x80) != 0);
+
+        if (GetStatusBit(DECIMAL_BIT))
+        {
+            A = BCDSubtraction(A, value, carry_bit);
+
+            /* Zero Flag */
+            SetStatusBit(ZERO_BIT, A == 0);
+
+            /* Overflow flag */
+            SetStatusBit(OVERFLOW_BIT, overflow);
+
+            /* Negative flag */
+            SetStatusBit(NEGATIVE_BIT, (sum & 0b10000000) > 0);
+        } else
+        {
+            ADC(~value);
+        }
     }
 
     void AND(uint8_t value)
@@ -1861,37 +1927,59 @@ struct CPU
     // TODO: make this function better, it doesn't cover all cases.
     uint8_t BCDAddition(uint8_t x, uint8_t y, bool carry)
     {
-        uint8_t result;
+        int16_t low = (x & 0x0F) + (y & 0x0F) + carry;
 
-        uint8_t low = (x & 0x0F) + (y & 0x0F) + carry;
-        uint8_t high = (x >> 4) + (y >> 4);
-
-        if (low > 9)
+        if (low > 0x09)
         {
-            low -= 10;
-
-            // The 1 needs to be carried into the tens digit
-            high++;
+            low += 0x06;
         }
 
-        uint8_t c = 0;
+        int16_t high = (x & 0xF0) + (y & 0xF0) + (low & 0x10);
 
-        if (high > 9)
+        if (high > 0x90)
         {
-            high -= 10;
-            c = 1;
+            high += 0x60;
         }
+
+        uint16_t result = high + (low & 0x0F);
+
+        bool c = (result > 0xFF);
 
         SetStatusBit(CARRY_BIT, c);
 
-        return (high << 4) | low;
+        return (uint8_t) (result & 0xFF);
+    }
+
+    uint8_t BCDSubtraction(uint8_t x, uint8_t y, bool carry)
+    {
+        int16_t low = (x & 0x0F) - (y & 0x0F) - (1 - carry);
+
+        int16_t high = (x >> 4) - (y >> 4);
+
+        if (low < 0)
+        {
+            low -= 6;
+            high -= 1;
+        }
+
+        if (high < 0)
+        {
+            high -= 6;
+        }
+
+        bool c = (high >= 0);
+
+        SetStatusBit(CARRY_BIT, c);
+
+        // If high wrapped below 0 after decimal adjustment, wrap it back to an 8-bit nibble space
+        uint8_t final_high = (high < 0) ? (high + 16) : high;
+
+        return (uint8_t) ((final_high & 0x0F) << 4) | (low & 0x0F);
     }
 
     /* Branch Helpers */
-    void Branch(uint32_t &cycles, Memory &memory)
+    void Branch(uint32_t &cycles, Memory &memory, int8_t offset)
     {
-        int8_t offset = FetchByte(cycles, memory);
-        
         uint16_t oldPC = PC;
 
         /* Branch taken (+1 cycle) */

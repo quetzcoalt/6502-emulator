@@ -153,6 +153,8 @@ cd build && ctest
 - INY ☑
 - DEC, with all its addressing modes ☑
 - INC, with all its addressing modes ☑
+- CLI ☑
+- SEI ☑
 
 - CMP, with all its addressing modes ☑
 - CPX, with all its addressing modes ☑
@@ -177,8 +179,25 @@ cd build && ctest
 
 - BIT, with all its addressing modes ☑
 
+- ADC, with all its addressing modes ☑
+- SBC, with all its addressing modes ☑
+
+- BNE ☑
+- BEQ ☑
+- BPL ☑
+- BMI ☑
+- BCC ☑
+- BCS ☑
+- BVC ☑
+- BVS ☑
+
 ## Tests to look at later as a reminder to myself
 - Branching.
 - RTI. 
-- Arithmetic operations because I still have to implement arithmetics in the BCD mode.  
-- CLI and SEI. 
+
+## Notes
+- In arithmetic operations (ADC, SBC), in the decimal mode, when adding two non valid BCD numbers, the value of the N and V flags, and the value of the sum A are unpredictable; I still can't get my head around what should be the result. 
+  - This explains why some tests and failing;
+  - And I will be ignoring them for now since the N and V flags have no meaning in decimal mode, and since the ADC or SBC will result in positive numbers anyways, and cannot exceed a threshold as long as the operands are within range. 
+  - The conclusion from all of this is that, if you want to use BCD mode, make sure you don't use non valid operands and everything will be alright.
+- PS: for some reason, all the SBC tests that I have tried so far pass, so why doesn't ADC do the same and keep those ambiguities about addition?

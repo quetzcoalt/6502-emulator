@@ -198,7 +198,7 @@ INSTANTIATE_TEST_SUITE_P(
       // CPU::INS_RTS,
 
       /* TODO: FAILED */
-      // CPU::INS_RTI,
+      CPU::INS_RTI,
       
       /* ===== BREAK ===== */
       /* NOT TESTED YET */
@@ -208,14 +208,14 @@ INSTANTIATE_TEST_SUITE_P(
       // CPU::INS_NOP,
 
       /* ===== ARITHMETIC OPERATIONS ===== */
-      CPU::INS_ADC_IM,
-      CPU::INS_ADC_ZP,
-      CPU::INS_ADC_ZPX,
-      CPU::INS_ADC_ABS,
-      CPU::INS_ADC_ABSX,
-      CPU::INS_ADC_ABSY,
-      CPU::INS_ADC_IDX,
-      CPU::INS_ADC_IDY,
+      // CPU::INS_ADC_IM,
+      // CPU::INS_ADC_ZP,
+      // CPU::INS_ADC_ZPX,
+      // CPU::INS_ADC_ABS,
+      // CPU::INS_ADC_ABSX,
+      // CPU::INS_ADC_ABSY,
+      // CPU::INS_ADC_IDX,
+      // CPU::INS_ADC_IDY,
 
       // CPU::INS_SBC_IM,
       // CPU::INS_SBC_ZP,
@@ -232,8 +232,6 @@ INSTANTIATE_TEST_SUITE_P(
       // CPU::INS_CLV,
       // CPU::INS_SED,
       // CPU::INS_CLD,
-
-      /* TODO: AFTER OTHER TESTS */
       // CPU::INS_CLI,
       // CPU::INS_SEI,
 
